@@ -11,7 +11,7 @@ class Train:
         self.job = job
         self.textgen = textgenrnn()
 
-    def save_lines_to_file(self, file_name, iteration, temperature, data):
+    def save_lines_to_file(self, iteration, temperature, data):
         self.create_dir(self.job.output_dir)
         file_handle = open(self.job.output_file, "a")
         file_handle.write("Iteration: " + str(iteration) + "\n")
@@ -33,7 +33,7 @@ class Train:
 
             for temp in self.job.temperatures_to_generate:
                 generated = self.textgen.generate(n=50, return_as_list=True, temperature=temp)
-                self.save_lines_to_file("output", i, temp, generated)
+                self.save_lines_to_file(i, temp, generated)
 
 class Job:
     def __init__(self, config_data, project_root_dir, job_name, input_folder, output_folder):
