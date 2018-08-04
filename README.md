@@ -1,8 +1,7 @@
 # Simple Text Generator
-This repo will contain simple scripts built on top of RNN libaries like textgenrnn to make it easier and faster for me to generate data for myself.
-
+Simple python application built on top of textgenrnn to make it easier and faster to generate data.
 ## Usage
-Testes on Ubuntu 16.04 and Python3.  Instructions require python3-venv package.
+Tested on Ubuntu 16.04 and Python3.5.  Instructions require python3-venv package.  Not currently tested on Windows.
 
 ### Set up environment:
 ~~~
@@ -15,13 +14,23 @@ pip3 install -r requirements.txt
 
 ### Running:
 
-train.py will read from training_data.txt in the same directory.
+Drop files to train on into 'incoming_training_files' folder and execute run.py.  
 
 ~~~
-python3 train.py
+python3 run.py
 ~~~
 
-Model will show up as 'textgenrnn_weights.hdf5' and output as 'output.txt'.
+Results will show up in projects/output/(file_name).
 
-If you run into issues executing, make sure your virtual environment is active (`source venv/bin/activate`).
+If you run into issues executing, make sure you've set up the environment correctly and that the virtual environment is active.
+
+~~~
+source venv/bin/activate
+~~~
+
+### Features coming soon:
+
+Much better and easier configuration
+
+Model export/import
 
