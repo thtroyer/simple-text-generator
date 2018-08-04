@@ -6,6 +6,7 @@ from textgenrnn import textgenrnn
 class Train:
     #todo add model export
     #todo capture texgenrnn output (loss, etc) for logging
+    #todo run until options (iterations? loss? time?)
     def __init__(self, job):
         self.job = job
         self.textgen = textgenrnn()
