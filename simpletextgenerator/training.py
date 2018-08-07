@@ -28,12 +28,21 @@ class Train:
             os.makedirs(path)
 
     def run(self):
-        for i in range(0, self.job.num_loops):
-            self.textgen.train_from_file(self.job.training_file, num_epochs=1)
+        for i in range(0, self.job.num_loops // self.job.generate_every_n_generations):
+            self.textgen.train_from_file(
+                self.job.training_file,
+                num_epochs=self.job.generate_every_n_generations,
+                train_size=self.job.training_data_percent,
+                dropout=self.job.dropout
+            )
 
             for temp in self.job.temperatures_to_generate:
-                generated = self.textgen.generate(n=50, return_as_list=True, temperature=temp)
-                self.save_lines_to_file(i, temp, generated)
+                generated = self.textgen.generate(n=self.job.items_to_generate_each_generation, return_as_list=True, temperature=temp)
+                self.save_lines_to_file(i * self.job.generate_every_n_generations, temp, generated)
+
+        generated = self.textgen.generate(n=self.job.items_to_generate_at_end, return_as_list=True, temperature=temp)
+        self.save_lines_to_file(i * self.job.generate_every_n_generations, temp, generated)
+
 
 class Job:
     def __init__(self, config_data, project_root_dir, job_name, input_folder, output_folder):
@@ -42,10 +51,14 @@ class Job:
         self.output_dir = project_root_dir + "/" + output_folder
         self.num_loops = config_data['training']['num_loops']
         self.priority = config_data['priority']
-        self.temperatures_to_generate = config_data['training']['temperatures_to_generate']
+        self.temperatures_to_generate = config_data['output']['temperatures_to_generate']
         self.project_root_dir = project_root_dir
         self.job_name = job_name
         self.input_folder = input_folder
         self.output_folder = output_folder
-
+        self.items_to_generate_each_generation = config_data['output']['items_to_generate_between_generations']
+        self.items_to_generate_at_end = config_data['output']['items_to_generate_at_end']
+        self.generate_every_n_generations = config_data['output']['generate_every_n_generations']
+        self.dropout = config_data['training']['dropout']
+        self.training_data_percent = config_data['training']['training_data_percent']
 

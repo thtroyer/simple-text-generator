@@ -1,10 +1,30 @@
-priority: 4
+priority: 5
 file:
   training_file: 'input.txt'
-  #output_file: 'output'
+  model_name: 'model.hdf5' #todo
+  output_file: 'output.txt' #todo
 training:
-  num_loops: 5
+  num_loops: 50
+  dropout:
+    # recommended 0-.2
+    0.1
+  training_data_percent:
+    0.8
+output:
   temperatures_to_generate:
-    - 0.8
-    - 1.0
-    - 1.2
+  - 0.8
+  - 1.0
+  - 1.2
+  items_to_generate_between_generations:
+    50
+  generate_every_n_generations:
+    5
+  dropout:
+    # recommended 0-.2
+    .05
+  training_data_percent:
+    0.8
+  items_to_generate_at_end:
+    500
+
+
