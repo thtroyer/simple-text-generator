@@ -36,12 +36,15 @@ class Train:
                 dropout=self.job.dropout
             )
 
+            self.textgen.save(self.job.project_root_dir + "/" + self.job.output_folder + "/" + self.job.job_name + "/model_" + str((i+1) * self.job.generate_every_n_generations) + ".hdf5")
+
             for temp in self.job.temperatures_to_generate:
                 generated = self.textgen.generate(n=self.job.items_to_generate_each_generation, return_as_list=True, temperature=temp)
                 self.save_lines_to_file(i * self.job.generate_every_n_generations, temp, generated)
 
         generated = self.textgen.generate(n=self.job.items_to_generate_at_end, return_as_list=True, temperature=temp)
         self.save_lines_to_file(i * self.job.generate_every_n_generations, temp, generated)
+        self.textgen.save(self.job.output_dir + "/model_" + str(self.job.num_loops) + ".hdf5")
 
 
 class Job:
