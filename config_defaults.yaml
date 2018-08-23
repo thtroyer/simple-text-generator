@@ -19,6 +19,8 @@ output:
     50
   generate_every_n_generations:
     5
+  save_model_every_n_generations:
+    5
   dropout:
     # recommended 0-.2
     .05

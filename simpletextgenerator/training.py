@@ -28,7 +28,7 @@ class Train:
             os.makedirs(path)
 
     def run(self):
-        for i in range(0, self.job.num_loops // self.job.generate_every_n_generations):
+        for i in range(0, self.job.num_loops):
             self.textgen.train_from_file(
                 self.job.training_file,
                 num_epochs=self.job.generate_every_n_generations,
@@ -36,14 +36,20 @@ class Train:
                 dropout=self.job.dropout
             )
 
-            self.textgen.save(self.job.project_root_dir + "/" + self.job.output_folder + "/" + self.job.job_name + "/model_" + str((i+1) * self.job.generate_every_n_generations) + ".hdf5")
+            if self.job.generate_every_n_generations > 0:
+                if (i % self.job.generate_every_n_generations) == 0:
+                    for temperature in self.job.temperatures_to_generate:
+                        generated = self.textgen.generate(n=self.job.items_to_generate_each_generation, return_as_list=True, temperature=temperature)
+                        self.save_lines_to_file(i * self.job.generate_every_n_generations, temperature, generated)
 
-            for temp in self.job.temperatures_to_generate:
-                generated = self.textgen.generate(n=self.job.items_to_generate_each_generation, return_as_list=True, temperature=temp)
-                self.save_lines_to_file(i * self.job.generate_every_n_generations, temp, generated)
+            if self.job.save_model_every_n_generations > 0:
+                if (i % self.job.save_model_every_n_generations) == 0:
+                    self.textgen.save(self.job.project_root_dir + "/" + self.job.output_folder + "/" + self.job.job_name + "/model_" + str((i+1) * self.job.generate_every_n_generations) + ".hdf5")
 
-        generated = self.textgen.generate(n=self.job.items_to_generate_at_end, return_as_list=True, temperature=temp)
-        self.save_lines_to_file(i * self.job.generate_every_n_generations, temp, generated)
+        for temperature in self.job.temperatures_to_generate:
+            generated = self.textgen.generate(n=self.job.items_to_generate_at_end, return_as_list=True, temperature=temperature)
+            self.save_lines_to_file(i * self.job.generate_every_n_generations, temperature, generated)
+
         self.textgen.save(self.job.output_dir + "/model_" + str(self.job.num_loops) + ".hdf5")
 
 
@@ -62,6 +68,8 @@ class Job:
         self.items_to_generate_each_generation = config_data['output']['items_to_generate_between_generations']
         self.items_to_generate_at_end = config_data['output']['items_to_generate_at_end']
         self.generate_every_n_generations = config_data['output']['generate_every_n_generations']
+        self.save_model_every_n_generations = config_data['output']['save_model_every_n_generations']
         self.dropout = config_data['training']['dropout']
         self.training_data_percent = config_data['training']['training_data_percent']
+
 
