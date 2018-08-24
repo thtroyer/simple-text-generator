@@ -31,7 +31,7 @@ class Train:
         for i in range(0, self.job.num_loops):
             self.textgen.train_from_file(
                 self.job.training_file,
-                num_epochs=self.job.generate_every_n_generations,
+                num_epochs=1,
                 train_size=self.job.training_data_percent,
                 dropout=self.job.dropout
             )
