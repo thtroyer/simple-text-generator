@@ -18,14 +18,9 @@ output:
   items_to_generate_between_generations:
     50
   generate_every_n_generations:
-    5
+    2
   save_model_every_n_generations:
-    5
-  dropout:
-    # recommended 0-.2
-    .05
-  training_data_percent:
-    0.8
+    2
   items_to_generate_at_end:
     500
 
