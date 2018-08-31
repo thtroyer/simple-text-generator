@@ -1,5 +1,5 @@
 # Simple Text Generator
-Simple python application built on top of textgenrnn to make it easier and faster to generate data.
+Simple python application built on top of textgenrnn to make it easier and faster to generate output text that mimics the input it was trained on.
 ## Usage
 Tested on Ubuntu 16.04 and Python3.5.  Instructions require python3-venv package.  Not currently tested on Windows.
 
