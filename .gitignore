@@ -1,2 +1,8 @@
+# python
 venv/*
 venv
+__pycache__/
+# pycharm
+.idea*
+# models
+*.hdf5
