@@ -1,3 +1,4 @@
+import inquirer
 import yaml
 import os
 import shutil
@@ -7,6 +8,61 @@ project_dir = "./projects"
 to_run_dir = "to_run"
 output_dir = "output"
 incoming_file_folder = "incoming_training_files"
+
+
+def main_activity_question():
+    activity_question = [
+      inquirer.List(
+          'activity',
+          message="What would you like to do?",
+          choices=['Create training job.', 'Run training jobs.', 'Create additional output from model.']
+      ),
+    ]
+    answer = inquirer.prompt(activity_question)
+    print(answer)
+
+    if answer['activity'] == 'Create training job.':
+        #todo select which input file
+        questions = [
+            inquirer.Text(
+                'num_loops',
+                message="How many iterations to train?",
+                default="10"),
+            inquirer.Text(
+                'temperatures',
+                message="What temperatures to generate?",
+                default="0.6, 0.8, 1.0"),
+            inquirer.Text(
+                'generate_every_n_generations',
+                message="While training, how many iterations between generating output?",
+                default="1"),
+            inquirer.Text(
+                'items_to_generate_between_generations',
+                message="How many to generate?",
+                default="50"),
+            inquirer.Text(
+                'save_model_every_n_generations',
+                message="How many iterations between saving model?",
+                default="5"),
+            inquirer.Text(
+                'items_to_generate_at_end',
+                message="After last iteration, how many items to generate?",
+                default="500"),
+
+            # inquirer.Text('phone', message="What's your phone number",
+            #               validate=lambda _, x: re.match('\+?\d[\d ]+\d', x),
+            #               )
+        ]
+        answers = inquirer.prompt(questions)
+        print(answers)
+        #todo create yaml
+
+
+main_activity_question()
+
+
+# ########### FROM run.py below ##########
+
 
 def create_project_from_files(input_files):
     for file in input_files:
