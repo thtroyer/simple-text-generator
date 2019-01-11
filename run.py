@@ -19,7 +19,7 @@ def create_project_from_files(input_files):
         new_project_dir = project_dir + "/" + to_run_dir + "/" + new_project_name
         os.mkdir(new_project_dir)
         os.rename(file, new_project_dir + "/input.txt")
-        shutil.copyfile("config_defaults.yaml", new_project_dir + "/config.yaml")
+        shutil.copyfile("config/config_defaults.yaml", new_project_dir + "/config.yaml")
 
 
 def create_jobs(project_dirs):
