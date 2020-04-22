@@ -13,11 +13,14 @@ class Train:
 
     def save_lines_to_file(self, iteration, temperature, data):
         self.create_dir(self.job.output_dir)
-        file_handle = open(self.job.output_file, "a")
+        file_handle = open(self.job.output_file, "a", encoding='utf-8')
         file_handle.write("Iteration: " + str(iteration) + "\n")
         file_handle.write("Temperature : " + str(temperature) + "\n")
         for item in data:
-            file_handle.write(item)
+            string_to_write = item
+            if isinstance(item, (bytes, bytearray)):
+                string_to_write = item.decode(encoding='utf-8', errors='ignore')
+            file_handle.write(string_to_write)
             file_handle.write("\n")
         file_handle.write("\n")
         file_handle.write("____________________________\n")
