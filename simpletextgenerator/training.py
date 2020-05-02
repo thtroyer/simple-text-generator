@@ -4,9 +4,9 @@ from textgenrnn import textgenrnn
 
 
 class Train:
-    #todo add model export
-    #todo capture texgenrnn output (loss, etc) for logging
-    #todo run until options (iterations? loss? time?)
+    # todo add model export
+    # todo capture texgenrnn output (loss, etc) for logging
+    # todo run until options (iterations? loss? time?)
     def __init__(self, job):
         self.job = job
         self.textgen = textgenrnn()
@@ -42,23 +42,29 @@ class Train:
             if self.job.generate_every_n_generations > 0:
                 if (i % self.job.generate_every_n_generations) == 0:
                     for temperature in self.job.temperatures_to_generate:
-                        generated = self.textgen.generate(n=self.job.items_to_generate_each_generation, return_as_list=True, temperature=temperature)
+                        generated = self.textgen.generate(n=self.job.items_to_generate_each_generation,
+                                                          return_as_list=True, temperature=temperature)
                         self.save_lines_to_file(i * self.job.generate_every_n_generations, temperature, generated)
 
             if self.job.save_model_every_n_generations > 0:
                 if (i % self.job.save_model_every_n_generations) == 0:
-                    self.textgen.save(self.job.project_root_dir + "/" + self.job.output_folder + "/" + self.job.job_name + "/model_" + str((i+1) * self.job.generate_every_n_generations) + ".hdf5")
+                    self.textgen.save(
+                        self.job.project_root_dir + "/" + self.job.output_folder + "/" + self.job.job_name + "/model_" +
+                        str((i + 1) * self.job.generate_every_n_generations) + ".hdf5"
+                    )
 
         for temperature in self.job.temperatures_to_generate:
-            generated = self.textgen.generate(n=self.job.items_to_generate_at_end, return_as_list=True, temperature=temperature)
-            self.save_lines_to_file(i * self.job.generate_every_n_generations, temperature, generated)
+            generated = self.textgen.generate(n=self.job.items_to_generate_at_end, return_as_list=True,
+                                              temperature=temperature)
+            self.save_lines_to_file("last", temperature, generated)
 
         self.textgen.save(self.job.output_dir + "/model_" + str(self.job.num_loops) + ".hdf5")
 
 
 class Job:
     def __init__(self, config_data, project_root_dir, job_name, input_folder, output_folder):
-        self.training_file = project_root_dir + '/' + output_folder + '/' + job_name + '/' + config_data['file']['training_file']
+        self.training_file = project_root_dir + '/' + output_folder + '/' + job_name + '/' \
+                             + config_data['file']['training_file']
         self.output_file = project_root_dir + "/" + output_folder + '/' + job_name + '/' + "/output.txt"
         self.output_dir = project_root_dir + "/" + output_folder
         self.num_loops = config_data['training']['num_loops']
@@ -74,5 +80,3 @@ class Job:
         self.save_model_every_n_generations = config_data['output']['save_model_every_n_generations']
         self.dropout = config_data['training']['dropout']
         self.training_data_percent = config_data['training']['training_data_percent']
-
-
