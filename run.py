@@ -1,7 +1,9 @@
 import yaml
 import os
 import shutil
+
 from simpletextgenerator import training
+from simpletextgenerator import job
 
 project_dir = "./projects"
 to_run_dir = "to_run"
@@ -23,14 +25,14 @@ def create_project_from_files(input_files):
 
 
 def create_jobs(project_dirs):
-    jobs = []
+    new_jobs = []
     project_root_path = os.path.abspath(project_dir)
     for project in project_dirs:
         project_name = os.path.basename(project)
         stream = open(project + "/config.yaml", 'r')
         config = yaml.load(stream)
-        jobs.append(training.Job(config, project_root_path, project_name, to_run_dir, output_dir))
-    return jobs
+        new_jobs.append(job.Job(config, project_root_path, project_name, to_run_dir, output_dir))
+    return new_jobs
 
 
 def sort_jobs(jobs):
