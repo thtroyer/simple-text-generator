@@ -23,51 +23,56 @@ def main_activity_question():
     print(answer)
 
     if answer['activity'] == 'Create training job.':
-        #todo select which input file
-        questions = [
-            inquirer.Text(
-                'num_loops',
-                message="How many iterations to train?",
-                default="10",
-                validate=lambda _, x: re.match('(^[0-9]*$)', x)),
-            inquirer.Text(
-                'training_data_percent',
-                message="For each iteration, what percent of the training data should be used?",
-                default="0.8",
-                validate=lambda _, x: re.match('(^0\.[0-9]*$)|(^\.[0-9]*$)|(^0|1#)', x)),
-            inquirer.Text(
-                'dropout',
-                message="Dropout value? (0-.2)",
-                default="0.0",
-                validate=lambda _, x: re.match('(^0\.[0-9]*$)|(^\.[0-9]*$)|(^0|1#)', x)),
-            inquirer.Text(
-                'generate_every_n_generations',
-                message="While training, how many iterations between generating output?",
-                default="1",
-                validate=lambda _, x: re.match('(^[0-9]*$)', x)),
-            inquirer.Text(
-                'items_to_generate_between_generations',
-                message="How many to generate?",
-                default="50",
-                validate=lambda _, x: re.match('(^[0-9]*$)', x)),
-            inquirer.Text(
-                'save_model_every_n_generations',
-                message="How many iterations between saving model?",
-                default="5",
-                validate=lambda _, x: re.match('(^[0-9]*$)', x)),
-            inquirer.Text(
-                'temperatures',
-                message="What temperatures to generate?",
-                default="0.6, 0.8, 1.0"),
-            #todo - regex
-            inquirer.Text(
-                'items_to_generate_at_end',
-                message="After last iteration, how many items to generate?",
-                default="500",
-                validate=lambda _, x: re.match('(^[0-9]*$)', x)),
-        ]
-        answers = inquirer.prompt(questions)
+        answers = create_questions()
         print(answers)
+
+
+def create_questions():
+    #todo select which input file
+    questions = [
+        inquirer.Text(
+            'num_loops',
+            message="How many iterations to train?",
+            default="10",
+            validate=lambda _, x: re.match('(^[0-9]*$)', x)),
+        inquirer.Text(
+            'training_data_percent',
+            message="For each iteration, what percent of the training data should be used?",
+            default="0.8",
+            validate=lambda _, x: re.match('(^0\.[0-9]*$)|(^\.[0-9]*$)|(^0|1#)', x)),
+        inquirer.Text(
+            'dropout',
+            message="Dropout value? (0-.2)",
+            default="0.0",
+            validate=lambda _, x: re.match('(^0\.[0-9]*$)|(^\.[0-9]*$)|(^0|1#)', x)),
+        inquirer.Text(
+            'generate_every_n_generations',
+            message="While training, how many iterations between generating output?",
+            default="1",
+            validate=lambda _, x: re.match('(^[0-9]*$)', x)),
+        inquirer.Text(
+            'items_to_generate_between_generations',
+            message="How many to generate?",
+            default="50",
+            validate=lambda _, x: re.match('(^[0-9]*$)', x)),
+        inquirer.Text(
+            'save_model_every_n_generations',
+            message="How many iterations between saving model?",
+            default="5",
+            validate=lambda _, x: re.match('(^[0-9]*$)', x)),
+        inquirer.Text(
+            'temperatures',
+            message="What temperatures to generate?",
+            default="0.6, 0.8, 1.0"),
+        #todo - regex
+        inquirer.Text(
+            'items_to_generate_at_end',
+            message="After last iteration, how many items to generate?",
+            default="500",
+            validate=lambda _, x: re.match('(^[0-9]*$)', x)),
+    ]
+    answers = inquirer.prompt(questions)
+    return answers
         #todo create yaml
 
 
