@@ -17,10 +17,9 @@ def create_project_from_files(input_files):
         if file_name == ".gitignore":
             continue
         new_project_name = os.path.splitext(file_name)[0]
-        # todo increment new_project_dir if it exists in to_run or output
         new_project_dir = project_dir + "/" + to_run_dir + "/" + new_project_name
         os.mkdir(new_project_dir)
-        os.rename(file, new_project_dir + "/input.txt")
+        os.rename(file, new_project_dir + "/" + new_project_name + ".txt")
         shutil.copyfile("config/config_defaults.yaml", new_project_dir + "/config.yaml")
 
 
