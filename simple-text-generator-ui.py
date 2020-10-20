@@ -1,12 +1,18 @@
+import os
+import pathlib
+from shutil import copyfile
+from tkinter import messagebox
+from tkinter import filedialog
 import tkinter as tk
-from time import sleep
+import chevron
+from pathlib import Path
 
 
 class WindowManager:
-
     def __init__(self):
         self.main_window = None
         self.new_job_window = None
+        # fields in new_job_window
         self.number_of_iterations = None
         self.project_name = None
         self.dropout = None
@@ -15,6 +21,9 @@ class WindowManager:
         self.generation_frequency = None
         self.save_frequency = None
         self.items_to_generate_at_end = None
+        self.button_open_training_file = None
+        self.training_file = None
+        self.training_file_origin_path = None
 
     def draw_main_window(self):
         main_window = tk.Tk()
@@ -30,8 +39,8 @@ class WindowManager:
         tk.Button(
             main_frame,
             text='Edit existing job',
-            command = quit,
-            state = tk.DISABLED
+            command=quit,
+            state=tk.DISABLED
         ).pack()
 
         tk.Button(
@@ -72,14 +81,18 @@ class WindowManager:
         self.project_name = tk.Entry(top_frame)
         self.project_name.grid(row=0, column=1)
 
-        tk.Button(bottom_frame, text='Back', command=self.back_new_job_window).grid(row=0, column=0)
+        tk.Button(bottom_frame, text='Cancel', command=self.back_new_job_window).grid(row=0, column=0)
         tk.Button(bottom_frame, text='Save New Job', command=self.save_new_job_window).grid(row=0, column=1)
         bottom_frame.grid()
         self.new_job_window = new_job_window
 
         model_frame = tk.Frame(main_frame, relief="raised", borderwidth=3)
         model_frame.grid(row=1, column=0)
-        tk.Label(model_frame, text="Training configuration").grid(row=0)
+        tk.Label(model_frame, text="Training file").grid(row=0, column=0)
+        self.button_open_training_file = tk.Button(model_frame, text="Select a file",
+                                                   command=self.set_training_file)
+        self.button_open_training_file.grid(row=0, column=1)
+
         tk.Label(model_frame, text="Number of iterations:").grid(row=1, column=0)
         self.number_of_iterations = tk.Entry(model_frame)
         self.number_of_iterations.grid(row=1, column=1)
@@ -116,13 +129,59 @@ class WindowManager:
         bottom_frame.grid(row=3, column=0)
 
     def back_new_job_window(self):
-        print(self.number_of_iterations.get())
-        # todo: save details somehow
         self.new_job_window.destroy()
 
     def save_new_job_window(self):
-        # todo: save details somehow
-        self.new_job_window.destroy()
+
+        try:
+            project_path = "projects/" + self.project_name.get()
+            self.create_new_project_dir(project_path)
+            self.create_config_file(project_path)
+            self.copy_training_file(project_path)
+            self.new_job_window.destroy()
+        except Exception as e:
+            print(e)
+            raise e
+
+    def format_config_file_text(self):
+        with open('config/config_template.mustache', 'r') as f:
+            return (chevron.render(f, {
+                'training_file': self.training_file,
+                'number_of_iterations': self.number_of_iterations.get(),
+                'dropout': self.dropout.get(),
+                'training_data_percent': '0.75',
+                'temperatures': self.temperatures_to_generate.get().split(','),
+                'items_to_generate_between_iterations': self.items_to_generate_between_generations.get(),
+                'generate_every_n_generations': self.generation_frequency.get(),
+                'save_model_every_n_generations': self.save_frequency.get(),
+                'items_to_generate_at_end': self.items_to_generate_at_end.get()
+            }))
+
+    def create_new_project_dir(self, path):
+        if os.path.exists(path):
+            messagebox.showerror(title="Error", message="Project already exists.")
+            raise Exception("Project already exists. Dir: " + path)
+
+        print("Creating dir: " + path)
+        os.makedirs(path)
+
+    def create_config_file(self, path):
+        with open(path + '/config.yaml', 'w') as f:
+            f.write(self.format_config_file_text())
+
+    def open_file_dialog(self):
+        home = os.path.expanduser('~')
+        return filedialog.askopenfilename(initialdir=home, title="Select file",
+                                          filetypes=(("file_type", "*.txt"), ("all files", "*.*")))
+
+    def set_training_file(self):
+        self.training_file_origin_path = self.open_file_dialog()
+        self.training_file = Path(self.training_file_origin_path).name
+        self.button_open_training_file['text'] = self.training_file
+
+    def copy_training_file(self, project_path):
+        current_dir = pathlib.Path(__file__).parent
+        copyfile(self.training_file_origin_path, str(current_dir) + "/" + project_path + "/" + self.training_file)
 
 
 if __name__ == "__main__":
