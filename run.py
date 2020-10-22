@@ -28,9 +28,11 @@ def create_jobs(project_dirs):
     project_root_path = os.path.abspath(project_dir)
     for project in project_dirs:
         project_name = os.path.basename(project)
-        stream = open(project + "/config.yaml", 'r')
-        config = yaml.load(stream)
-        new_jobs.append(job.Job(config, project_root_path, project_name, to_run_dir, output_dir))
+        with open(project + "/config.yaml", 'r') as config:
+            config_data = yaml.load(config)
+        with open(project + "/config.yaml", 'r') as state:
+            state_data = yaml.load(state)
+        new_jobs.append(job.Job(config_data, state_data, project_root_path, project_name, to_run_dir, output_dir))
     return new_jobs
 
 

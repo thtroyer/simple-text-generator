@@ -1,6 +1,6 @@
 
 class Job:
-    def __init__(self, config_data, project_root_dir, job_name, input_folder, output_folder):
+    def __init__(self, config_data, state_data, project_root_dir, job_name, input_folder, output_folder):
         self.training_file = project_root_dir + '/' + output_folder + '/' + job_name + '/' \
                              + config_data['file']['training_file']
         self.output_file = project_root_dir + "/" + output_folder + '/' + job_name + '/' + "/output.txt"
@@ -18,3 +18,7 @@ class Job:
         self.save_model_every_n_generations = config_data['output']['save_model_every_n_generations']
         self.dropout = config_data['training']['dropout']
         self.training_data_percent = config_data['training']['training_data_percent']
+
+        self.status = state_data['status']
+        self.number_of_iterations = state_data['number_of_iterations']
+        self.model = state_data['model']
