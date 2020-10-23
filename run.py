@@ -28,6 +28,8 @@ def create_jobs(project_dirs):
     project_root_path = os.path.abspath(project_dir)
     for project in project_dirs:
         project_name = os.path.basename(project)
+        if project_name == 'archive':
+            continue
         with open(project + "/config.yaml", 'r') as config:
             config_data = yaml.load(config)
         with open(project + "/state.yaml", 'r') as state:
@@ -43,16 +45,20 @@ def sort_jobs(jobs):
 
 def train(jobs):
     for job in jobs:
-        input_job_folder = project_dir + "/" + to_run_dir + "/" + job.job_name
-        output_job_folder = project_dir + "/" + output_dir + "/" + job.job_name
-        os.rename(input_job_folder, output_job_folder)
+        if job.status == 'completed':
+            continue
+        # input_job_folder = project_dir + "/" + to_run_dir + "/" + job.job_name
+        # output_job_folder = project_dir + "/" + output_dir + "/" + job.job_name
+        # os.rename(input_job_folder, output_job_folder)
         train = training.Train(job)
         train.run()
 
 
-incoming_flat_files = [f.path for f in os.scandir(incoming_file_folder) if not f.is_dir()]
-create_project_from_files(incoming_flat_files)
-project_dirs = [f.path for f in os.scandir(project_dir + "/" + to_run_dir) if f.is_dir()]
+#todo: move this to standalone file
+# incoming_flat_files = [f.path for f in os.scandir(incoming_file_folder) if not f.is_dir()]
+# create_project_from_files(incoming_flat_files)
+
+project_dirs = [f.path for f in os.scandir(project_dir) if f.is_dir()]
 jobs = create_jobs(project_dirs)
 sorted_jobs = sort_jobs(jobs)
 train(sorted_jobs)

@@ -152,7 +152,7 @@ class WindowManager:
                 'number_of_iterations': self.number_of_iterations.get(),
                 'dropout': self.dropout.get(),
                 'training_data_percent': '0.75',
-                'temperatures': self.temperatures_to_generate.get().split(','),
+                'temperatures': map(str.strip, self.temperatures_to_generate.get().split(',')),
                 'items_to_generate_between_iterations': self.items_to_generate_between_generations.get(),
                 'generate_every_n_generations': self.generation_frequency.get(),
                 'save_model_every_n_generations': self.save_frequency.get(),
@@ -181,8 +181,8 @@ class WindowManager:
         with open('templates/state.yml.mustache', 'r') as f:
             return (chevron.render(f, {
                 'status': 'new',
-                'number_of_iterations_run': 0,
-                'model': ''
+                'iterations_run': 0,
+                'latest_model_saved': ''
             }))
 
     @staticmethod

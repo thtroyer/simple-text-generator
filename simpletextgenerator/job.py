@@ -1,10 +1,11 @@
 
 class Job:
     def __init__(self, config_data, state_data, project_root_dir, job_name, input_folder, output_folder):
-        self.training_file = project_root_dir + '/' + output_folder + '/' + job_name + '/' \
+        # from config.yaml
+        self.training_file = project_root_dir + '/' + job_name + '/' \
                              + config_data['file']['training_file']
-        self.output_file = project_root_dir + "/" + output_folder + '/' + job_name + '/' + "/output.txt"
-        self.output_dir = project_root_dir + "/" + output_folder
+        self.output_file = project_root_dir + "/" + job_name + "/output.txt"
+        self.output_dir = project_root_dir + "/"
         self.num_loops = config_data['training']['num_loops']
         self.priority = config_data['priority']
         self.temperatures_to_generate = config_data['output']['temperatures_to_generate']
@@ -19,6 +20,7 @@ class Job:
         self.dropout = config_data['training']['dropout']
         self.training_data_percent = config_data['training']['training_data_percent']
 
+        # from state.yaml
         self.status = state_data['status']
-        self.number_of_iterations = state_data['number_of_iterations']
-        self.model = state_data['model']
+        self.iterations_run = state_data['iterations_run']
+        self.latest_model_saved = state_data['latest_model_saved']

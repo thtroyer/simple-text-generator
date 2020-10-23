@@ -53,7 +53,7 @@ class Train:
         if self.job.save_model_every_n_generations > 0:
             if (i % self.job.save_model_every_n_generations) == 0:
                 self.textgen.save(
-                    self.job.project_root_dir + "/" + self.job.output_folder + "/" + self.job.job_name + "/model_" +
+                    self.job.project_root_dir + "/" + self.job.job_name + "/model_" +
                     str((i + 1) * self.job.generate_every_n_generations) + ".hdf5"
                 )
 
@@ -72,3 +72,7 @@ class Train:
             train_size=self.job.training_data_percent,
             dropout=self.job.dropout
         )
+
+    def update_state(self):
+        #todo
+        pass
