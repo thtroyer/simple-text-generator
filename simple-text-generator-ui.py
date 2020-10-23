@@ -137,14 +137,16 @@ class WindowManager:
             project_path = "projects/" + self.project_name.get()
             self.create_new_project_dir(project_path)
             self.create_config_file(project_path)
+            self.create_state_file(project_path)
             self.copy_training_file(project_path)
             self.new_job_window.destroy()
         except Exception as e:
+            # todo remove
             print(e)
             raise e
 
-    def format_config_file_text(self):
-        with open('config/config_template.mustache', 'r') as f:
+    def render_config_file_text(self):
+        with open('templates/config.yml.mustache', 'r') as f:
             return (chevron.render(f, {
                 'training_file': self.training_file,
                 'number_of_iterations': self.number_of_iterations.get(),
@@ -157,22 +159,13 @@ class WindowManager:
                 'items_to_generate_at_end': self.items_to_generate_at_end.get()
             }))
 
-    def create_new_project_dir(self, path):
-        if os.path.exists(path):
-            messagebox.showerror(title="Error", message="Project already exists.")
-            raise Exception("Project already exists. Dir: " + path)
-
-        print("Creating dir: " + path)
-        os.makedirs(path)
-
     def create_config_file(self, path):
         with open(path + '/config.yaml', 'w') as f:
-            f.write(self.format_config_file_text())
+            f.write(self.render_config_file_text())
 
-    def open_file_dialog(self):
-        home = os.path.expanduser('~')
-        return filedialog.askopenfilename(initialdir=home, title="Select file",
-                                          filetypes=(("file_type", "*.txt"), ("all files", "*.*")))
+    def create_state_file(self, path):
+        with open(path + '/state.yaml', 'w') as f:
+            f.write(self.render_state_file_text())
 
     def set_training_file(self):
         self.training_file_origin_path = self.open_file_dialog()
@@ -182,6 +175,33 @@ class WindowManager:
     def copy_training_file(self, project_path):
         current_dir = pathlib.Path(__file__).parent
         copyfile(self.training_file_origin_path, str(current_dir) + "/" + project_path + "/" + self.training_file)
+
+    @staticmethod
+    def render_state_file_text():
+        with open('templates/state.yml.mustache', 'r') as f:
+            return (chevron.render(f, {
+                'status': 'new',
+                'number_of_iterations_run': 0,
+                'model': ''
+            }))
+
+    @staticmethod
+    def create_new_project_dir(path):
+        if os.path.exists(path):
+            messagebox.showerror(title="Error", message="Project already exists.")
+            raise Exception("Project already exists. Dir: " + path)
+
+        print("Creating dir: " + path)
+        os.makedirs(path)
+
+    @staticmethod
+    def open_file_dialog():
+        home = os.path.expanduser('~')
+        return filedialog.askopenfilename(
+            initialdir=home,
+            title="Select file",
+            filetypes=(("file_type", "*.txt"), ("all files", "*.*"))
+        )
 
 
 if __name__ == "__main__":

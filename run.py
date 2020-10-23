@@ -20,7 +20,7 @@ def create_project_from_files(input_files):
         new_project_dir = project_dir + "/" + to_run_dir + "/" + new_project_name
         os.mkdir(new_project_dir)
         os.rename(file, new_project_dir + "/" + new_project_name + ".txt")
-        shutil.copyfile("config/config_defaults.yaml", new_project_dir + "/config.yaml")
+        shutil.copyfile("templates/config_defaults.yaml", new_project_dir + "/templates.yaml")
 
 
 def create_jobs(project_dirs):
@@ -30,7 +30,7 @@ def create_jobs(project_dirs):
         project_name = os.path.basename(project)
         with open(project + "/config.yaml", 'r') as config:
             config_data = yaml.load(config)
-        with open(project + "/config.yaml", 'r') as state:
+        with open(project + "/state.yaml", 'r') as state:
             state_data = yaml.load(state)
         new_jobs.append(job.Job(config_data, state_data, project_root_path, project_name, to_run_dir, output_dir))
     return new_jobs
