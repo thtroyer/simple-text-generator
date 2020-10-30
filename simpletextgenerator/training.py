@@ -1,14 +1,26 @@
 import os
+import chevron
 
 from textgenrnn import textgenrnn
+
+from simpletextgenerator.job import Job
+
+
+class TrainingStatus:
+    NOT_STARTED = 0
+    STARTED = 1
+    FINISHED = 2
 
 
 class Train:
     # todo add model export
     # todo capture texgenrnn output (loss, etc) for logging
     # todo run until options (iterations? loss? time?)
-    def __init__(self, job):
+    def __init__(self, job: Job):
         self.job = job
+        self.status = job.status
+        self.last_saved_model = job.latest_model_saved
+        self.iterations_run = job.iterations_run
         self.textgen = textgenrnn()
 
     def save_lines_to_file(self, iteration, temperature, data):
@@ -30,11 +42,31 @@ class Train:
         if not os.path.exists(path):
             os.makedirs(path)
 
+    def load_model(self, model_name):
+        path = f"{self.job.project_root_dir}/{self.job.job_name}/{model_name}.hdf5"
+        self.textgen.load(path)
+
     def run(self):
+        if self.status == TrainingStatus.FINISHED:
+            return
+
+        if self.status == TrainingStatus.STARTED:
+            self.load_model(self.last_saved_model)
+
+        self.status = TrainingStatus.STARTED
         for i in range(0, self.job.num_loops):
+            #todo remove debug
+            print("Training model")
             self.train_model()
+            print("Generating text")
             self.generate_text(i)
-            self.save_model(i)
+            print("Saving model")
+            self.save_model_iteration(i)
+            print("Saving model current")
+            self.save_model("model_current")
+            self.iterations_run += 1
+            print("Updating state")
+            self.update_state()
 
         self.generate_final_text()
         self.save_final_model()
@@ -49,12 +81,17 @@ class Train:
             )
             self.save_lines_to_file("last", temperature, generated)
 
-    def save_model(self, i):
+    def save_model(self, model_name: str):
+        self.last_saved_model = model_name
+        self.textgen.save(
+            self.job.project_root_dir + "/" + self.job.job_name
+            + "/model_" + model_name + ".hdf5")
+
+    def save_model_iteration(self, i):
         if self.job.save_model_every_n_generations > 0:
             if (i % self.job.save_model_every_n_generations) == 0:
-                self.textgen.save(
-                    self.job.project_root_dir + "/" + self.job.job_name + "/model_" +
-                    str((i + 1) * self.job.generate_every_n_generations) + ".hdf5"
+                self.save_model(
+                    str((i + 1) * self.job.generate_every_n_generations)
                 )
 
     def generate_text(self, i):
@@ -74,5 +111,14 @@ class Train:
         )
 
     def update_state(self):
-        #todo
-        pass
+        path = f"{self.job.project_root_dir}/{self.job.job_name}"
+        with open(path + '/state.yaml', 'w') as f:
+            f.write(self.render_state_file_text())
+
+    def render_state_file_text(self):
+        with open('templates/state.yml.mustache', 'r') as f:
+            return (chevron.render(f, {
+                'status': self.status,
+                'iterations_run': self.iterations_run,
+                'latest_model_saved': self.last_saved_model
+            }))

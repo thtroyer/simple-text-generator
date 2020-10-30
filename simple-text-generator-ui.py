@@ -148,6 +148,7 @@ class WindowManager:
     def render_config_file_text(self):
         with open('templates/config.yml.mustache', 'r') as f:
             return (chevron.render(f, {
+                'priority': 0,
                 'training_file': self.training_file,
                 'number_of_iterations': self.number_of_iterations.get(),
                 'dropout': self.dropout.get(),
@@ -180,7 +181,7 @@ class WindowManager:
     def render_state_file_text():
         with open('templates/state.yml.mustache', 'r') as f:
             return (chevron.render(f, {
-                'status': 'new',
+                'status': 0,
                 'iterations_run': 0,
                 'latest_model_saved': ''
             }))
