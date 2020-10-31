@@ -43,6 +43,7 @@ class Train:
             os.makedirs(path)
 
     def load_model(self, model_name):
+        print("Loading model")
         path = f"{self.job.project_root_dir}/{self.job.job_name}/{model_name}.hdf5"
         self.textgen.load(path)
 
@@ -55,26 +56,24 @@ class Train:
 
         self.status = TrainingStatus.STARTED
         for i in range(0, self.job.num_loops):
-            #todo remove debug
-            print("Training model")
             self.train_model()
-            print("Generating text")
             self.generate_text(i)
-            print("Saving model")
             self.save_model_iteration(i)
-            print("Saving model current")
             self.save_model("model_current")
             self.iterations_run += 1
-            print("Updating state")
             self.update_state()
 
         self.generate_final_text()
         self.save_final_model()
+        self.status = TrainingStatus.FINISHED
+        self.update_state()
 
     def save_final_model(self):
+        print("Saving final model")
         self.textgen.save(self.job.output_dir + "/model_" + str(self.job.num_loops) + ".hdf5")
 
     def generate_final_text(self):
+        print("Generating final text")
         for temperature in self.job.temperatures_to_generate:
             generated = self.textgen.generate(
                 n=self.job.items_to_generate_at_end, return_as_list=True, temperature=temperature
@@ -82,12 +81,14 @@ class Train:
             self.save_lines_to_file("last", temperature, generated)
 
     def save_model(self, model_name: str):
+        print("Saving model current")
         self.last_saved_model = model_name
         self.textgen.save(
             self.job.project_root_dir + "/" + self.job.job_name
             + "/model_" + model_name + ".hdf5")
 
     def save_model_iteration(self, i):
+        print("Saving model")
         if self.job.save_model_every_n_generations > 0:
             if (i % self.job.save_model_every_n_generations) == 0:
                 self.save_model(
@@ -95,6 +96,7 @@ class Train:
                 )
 
     def generate_text(self, i):
+        print("Generating text")
         if self.job.generate_every_n_generations > 0:
             if (i % self.job.generate_every_n_generations) == 0:
                 for temperature in self.job.temperatures_to_generate:
@@ -111,6 +113,7 @@ class Train:
         )
 
     def update_state(self):
+        print("Updating state")
         path = f"{self.job.project_root_dir}/{self.job.job_name}"
         with open(path + '/state.yaml', 'w') as f:
             f.write(self.render_state_file_text())
