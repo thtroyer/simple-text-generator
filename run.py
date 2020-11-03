@@ -53,3 +53,8 @@ if __name__ == "__main__":
     sort_jobs(jobs_to_run)
     train(jobs_to_run)
 
+    print('')
+    print('------------------------------------')
+    print("All done.  Ctrl+c to exit terminal.")
+    input()
+
