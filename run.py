@@ -8,7 +8,6 @@ from simpletextgenerator import job
 project_dir = "./projects"
 to_run_dir = "to_run"
 output_dir = "output"
-incoming_file_folder = "incoming_training_files"
 
 
 def create_project_from_files(input_files):
@@ -17,42 +16,49 @@ def create_project_from_files(input_files):
         if file_name == ".gitignore":
             continue
         new_project_name = os.path.splitext(file_name)[0]
-        # todo increment new_project_dir if it exists in to_run or output
         new_project_dir = project_dir + "/" + to_run_dir + "/" + new_project_name
         os.mkdir(new_project_dir)
-        os.rename(file, new_project_dir + "/input.txt")
-        shutil.copyfile("config/config_defaults.yaml", new_project_dir + "/config.yaml")
+        os.rename(file, new_project_dir + "/" + new_project_name + ".txt")
+        shutil.copyfile("templates/config_defaults.yaml", new_project_dir + "/templates.yaml")
 
 
-def create_jobs(project_dirs):
+def create_jobs(dirs):
     new_jobs = []
     project_root_path = os.path.abspath(project_dir)
-    for project in project_dirs:
+    for project in dirs:
         project_name = os.path.basename(project)
-        stream = open(project + "/config.yaml", 'r')
-        config = yaml.load(stream)
-        new_jobs.append(job.Job(config, project_root_path, project_name, to_run_dir, output_dir))
+        if project_name == 'archive':
+            continue
+        try:
+            with open(project + "/config.yaml", 'r') as config:
+                config_data = yaml.safe_load(config)
+            with open(project + "/state.yaml", 'r') as state:
+                state_data = yaml.safe_load(state)
+        except FileNotFoundError:
+            print(f"Missing config.yaml or state.yaml. Skipping {project} directory")
+            continue
+        new_jobs.append(job.Job(config_data, state_data, project_root_path, project_name, to_run_dir, output_dir))
     return new_jobs
 
 
-def sort_jobs(jobs):
-    jobs.sort(key=lambda x: x.priority, reverse=True)
-    return jobs
+def sort_jobs(jobs_to_sort):
+    jobs_to_sort.sort(key=lambda x: x.priority, reverse=True)
 
 
 def train(jobs):
     for job in jobs:
-        input_job_folder = project_dir + "/" + to_run_dir + "/" + job.job_name
-        output_job_folder = project_dir + "/" + output_dir + "/" + job.job_name
-        os.rename(input_job_folder, output_job_folder)
-        train = training.Train(job)
-        train.run()
+        training_model = training.Train(job)
+        training_model.run()
 
 
-incoming_flat_files = [f.path for f in os.scandir(incoming_file_folder) if not f.is_dir()]
-create_project_from_files(incoming_flat_files)
-project_dirs = [f.path for f in os.scandir(project_dir + "/" + to_run_dir) if f.is_dir()]
-jobs = create_jobs(project_dirs)
-sorted_jobs = sort_jobs(jobs)
-train(sorted_jobs)
+if __name__ == "__main__":
+    project_dirs = [f.path for f in os.scandir(project_dir) if f.is_dir()]
+    jobs_to_run = create_jobs(project_dirs)
+    sort_jobs(jobs_to_run)
+    train(jobs_to_run)
+
+    print('')
+    print('------------------------------------')
+    print("All done.  Ctrl+c to exit terminal.")
+    input()
 

@@ -1,0 +1,24 @@
+priority: {{ priority }}
+file:
+  training_file: '{{ training_file }}'
+  initial_model_to_load: '{{ model_to_load }}'
+  output_file: 'output.txt'
+training:
+  num_loops: {{ number_of_iterations }}
+  dropout:
+    {{ dropout }}
+  training_data_percent:
+    {{ training_data_percent }}
+output:
+  temperatures_to_generate:
+  {{#temperatures}}
+     - {{.}}
+  {{/temperatures}}
+  items_to_generate_between_generations:
+    {{items_to_generate_between_iterations}}
+  generate_every_n_generations:
+    {{generate_every_n_generations}}
+  save_model_every_n_generations:
+    {{save_model_every_n_generations}}
+  items_to_generate_at_end:
+    {{items_to_generate_at_end}}
