@@ -7,9 +7,10 @@ from simpletextgenerator.job import Job
 
 
 class TrainingStatus:
-    NOT_STARTED = 0
-    STARTED = 1
-    FINISHED = 2
+    NEW = 0
+    NEW_LOAD_MODEL = 10
+    STARTED = 20
+    FINISHED = 30
 
 
 class Train:
@@ -22,6 +23,7 @@ class Train:
         self.last_saved_model = job.latest_model_saved
         self.iterations_run = job.iterations_run
         self.textgen = textgenrnn()
+        self.initial_model_to_load = job.initial_model_to_load
 
     def save_lines_to_file(self, iteration, temperature, data):
         self.create_dir(self.job.output_dir)
@@ -44,7 +46,10 @@ class Train:
 
     def load_model(self, model_name):
         print("Loading model")
-        path = f"{self.job.project_root_dir}/{self.job.job_name}/{model_name}.hdf5"
+        path = f"{self.job.project_root_dir}/{self.job.job_name}/{model_name}"
+        if path[-5:] != ".hdf5":
+            path = f"{path}.hdf5"
+
         self.textgen.load(path)
 
     def run(self):
@@ -53,6 +58,9 @@ class Train:
 
         if self.status == TrainingStatus.STARTED:
             self.load_model(self.last_saved_model)
+
+        if self.status == TrainingStatus.NEW_LOAD_MODEL:
+            self.load_model(self.initial_model_to_load)
 
         self.status = TrainingStatus.STARTED
         for i in range(0, self.job.num_loops):

@@ -19,6 +19,7 @@ class Job:
         self.save_model_every_n_generations = config_data['output']['save_model_every_n_generations']
         self.dropout = config_data['training']['dropout']
         self.training_data_percent = config_data['training']['training_data_percent']
+        self.initial_model_to_load = config_data['file']['initial_model_to_load']
 
         # from state.yaml
         self.status = state_data['status']

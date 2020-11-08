@@ -29,10 +29,14 @@ def create_jobs(dirs):
         project_name = os.path.basename(project)
         if project_name == 'archive':
             continue
-        with open(project + "/config.yaml", 'r') as config:
-            config_data = yaml.safe_load(config)
-        with open(project + "/state.yaml", 'r') as state:
-            state_data = yaml.safe_load(state)
+        try:
+            with open(project + "/config.yaml", 'r') as config:
+                config_data = yaml.safe_load(config)
+            with open(project + "/state.yaml", 'r') as state:
+                state_data = yaml.safe_load(state)
+        except FileNotFoundError:
+            print(f"Missing config.yaml or state.yaml. Skipping {project} directory")
+            continue
         new_jobs.append(job.Job(config_data, state_data, project_root_path, project_name, to_run_dir, output_dir))
     return new_jobs
 
