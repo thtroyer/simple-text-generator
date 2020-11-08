@@ -65,3 +65,5 @@ UI to archive project
 Run training inside UI
 
 Generate data from model without more training
+
+Update textgenrnn version

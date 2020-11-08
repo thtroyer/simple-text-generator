@@ -24,6 +24,7 @@ class WindowManager:
         self.dropout = None
         self.temperatures_to_generate = None
         self.items_to_generate_between_generations = None
+        self.training_data_percent = None
         self.generation_frequency = None
         self.save_frequency = None
         self.items_to_generate_at_end = None
@@ -120,27 +121,31 @@ class WindowManager:
         tk.Label(model_frame, text="Dropout (keep low, ~0-0.2):").grid(row=2)
         self.dropout = tk.Entry(model_frame)
         self.dropout.grid(row=2, column=1)
-        tk.Label(model_frame, text="Temperatures to generate:").grid(row=3)
+        tk.Label(model_frame, text="Training Data Percent, 0-1.0):").grid(row=3)
+        self.training_data_percent = tk.Entry(model_frame)
+        self.training_data_percent .grid(row=3, column=1)
+        tk.Label(model_frame, text="Temperatures to generate:").grid(row=4)
         self.temperatures_to_generate = tk.Entry(model_frame)
-        self.temperatures_to_generate.grid(row=3, column=1)
-        tk.Label(model_frame, text="Items to generate between generations:").grid(row=4)
+        self.temperatures_to_generate.grid(row=4, column=1)
+        tk.Label(model_frame, text="Items to generate between generations:").grid(row=5)
         self.items_to_generate_between_generations = tk.Entry(model_frame)
-        self.items_to_generate_between_generations.grid(row=4, column=1)
-        tk.Label(model_frame, text="Generate every _ generations:").grid(row=5)
+        self.items_to_generate_between_generations.grid(row=5, column=1)
+        tk.Label(model_frame, text="Generate every _ generations:").grid(row=6)
         self.generation_frequency = tk.Entry(model_frame)
-        self.generation_frequency.grid(row=5, column=1)
-        tk.Label(model_frame, text="Save model every _ generations:").grid(row=6)
+        self.generation_frequency.grid(row=6, column=1)
+        tk.Label(model_frame, text="Save model every _ generations:").grid(row=7)
         self.save_frequency = tk.Entry(model_frame)
-        self.save_frequency.grid(row=6, column=1)
-        tk.Label(model_frame, text="Items to generate at end:").grid(row=7)
+        self.save_frequency.grid(row=7, column=1)
+        tk.Label(model_frame, text="Items to generate at end:").grid(row=8)
         self.items_to_generate_at_end = tk.Entry(model_frame)
-        self.items_to_generate_at_end.grid(row=7, column=1)
+        self.items_to_generate_at_end.grid(row=8, column=1)
 
         # Set some sane defaults:
         self.number_of_iterations.insert(tk.END, 5)
         self.dropout.insert(tk.END, 0)
         self.temperatures_to_generate.insert(tk.END, "0.5, 1.0, 1.25")
         self.items_to_generate_between_generations.insert(tk.END, 50)
+        self.training_data_percent.insert(tk.END, "0.75")
         self.generation_frequency.insert(tk.END, 1)
         self.save_frequency.insert(tk.END, 2)
         self.items_to_generate_at_end.insert(tk.END, 500)
@@ -186,27 +191,31 @@ class WindowManager:
         tk.Label(model_frame, text="Dropout (keep low, ~0-0.2):").grid(row=3)
         self.dropout = tk.Entry(model_frame)
         self.dropout.grid(row=3, column=1)
-        tk.Label(model_frame, text="Temperatures to generate:").grid(row=4)
+        tk.Label(model_frame, text="Training Data Percent, 0-1.0):").grid(row=4)
+        self.training_data_percent = tk.Entry(model_frame)
+        self.training_data_percent .grid(row=4, column=1)
+        tk.Label(model_frame, text="Temperatures to generate:").grid(row=5)
         self.temperatures_to_generate = tk.Entry(model_frame)
-        self.temperatures_to_generate.grid(row=4, column=1)
-        tk.Label(model_frame, text="Items to generate between generations:").grid(row=5)
+        self.temperatures_to_generate.grid(row=5, column=1)
+        tk.Label(model_frame, text="Items to generate between generations:").grid(row=6)
         self.items_to_generate_between_generations = tk.Entry(model_frame)
-        self.items_to_generate_between_generations.grid(row=5, column=1)
-        tk.Label(model_frame, text="Generate every _ generations:").grid(row=6)
+        self.items_to_generate_between_generations.grid(row=6, column=1)
+        tk.Label(model_frame, text="Generate every _ generations:").grid(row=7)
         self.generation_frequency = tk.Entry(model_frame)
-        self.generation_frequency.grid(row=6, column=1)
-        tk.Label(model_frame, text="Save model every _ generations:").grid(row=7)
+        self.generation_frequency.grid(row=7, column=1)
+        tk.Label(model_frame, text="Save model every _ generations:").grid(row=8)
         self.save_frequency = tk.Entry(model_frame)
-        self.save_frequency.grid(row=7, column=1)
-        tk.Label(model_frame, text="Items to generate at end:").grid(row=8)
+        self.save_frequency.grid(row=8, column=1)
+        tk.Label(model_frame, text="Items to generate at end:").grid(row=9)
         self.items_to_generate_at_end = tk.Entry(model_frame)
-        self.items_to_generate_at_end.grid(row=8, column=1)
+        self.items_to_generate_at_end.grid(row=9, column=1)
 
         # Set some sane defaults:
         self.number_of_iterations.insert(tk.END, 5)
         self.dropout.insert(tk.END, 0)
         self.temperatures_to_generate.insert(tk.END, "0.5, 1.0, 1.25")
         self.items_to_generate_between_generations.insert(tk.END, 50)
+        self.training_data_percent.insert(tk.END, "0.75")
         self.generation_frequency.insert(tk.END, 1)
         self.save_frequency.insert(tk.END, 2)
         self.items_to_generate_at_end.insert(tk.END, 500)
@@ -255,7 +264,7 @@ class WindowManager:
                 'training_file': self.training_file,
                 'number_of_iterations': self.number_of_iterations.get(),
                 'dropout': self.dropout.get(),
-                'training_data_percent': '0.75',
+                'training_data_percent': self.training_data_percent.get(),
                 'temperatures': map(str.strip, self.temperatures_to_generate.get().split(',')),
                 'items_to_generate_between_iterations': self.items_to_generate_between_generations.get(),
                 'generate_every_n_generations': self.generation_frequency.get(),
