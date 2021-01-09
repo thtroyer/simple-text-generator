@@ -3,21 +3,23 @@ Simple Text Generator is a project to make it easy to train RNN on a set of text
 
 Built in python, utilizing the textgenrrn library (tensorflow).
 
-## Example usage
-
-todo
-
 ## Usage
-Tested on Ubuntu 16.04 with Python3.5 and Windows with Python 3.7.7.  Instructions require python3-venv package.
+Tested on Ubuntu 16.04 with Python3.8.7.  (Windows needs retested)
 
 ### Set up environment
+
+The following instructions are examples; adapt them for your needs.
+
+Use requirements.txt for CPU-based training and requirements-gpu.txt for GPU-based training.
+
 ####Linux:
+
 ~~~
 git clone git@github.com:thtroyer/simple-text-generator.git
 cd simple-text-generator
 python3 -m venv env
 source env/bin/activate
-pip3 install -r requirements.txt
+python3 -m pip install -r requirements.txt
 ~~~
 
 ####Windows:
@@ -34,16 +36,16 @@ pip install -r requirements.txt
 
 Utilize `simple-text-generator-ui.py` to configure a project to run.  Projects are created and viewable in the projects/ directory.
 
-Once a project is created, run the project by using `run.py`.  The trained model is saved off at the interval configured.  `run.py` can be killed at any time and resumed later from the last saved model.
+Once a project is created, run the project by using `train.py`.  The trained model is saved off at the interval configured.  `train.py` can be killed at any time and resumed later from the last saved model.
 
-To run, make sure you are in the virtual environment.
+If you encounter errors when attempting to train, make sure your virtual environment is activated.
 
 ####Linux:
 ~~~
 source env/bin/activate
 python3 simple-text-generator-ui.py
 
-python3 run.py
+python3 train.py
 ~~~
 
 ####Windows (cmd):
@@ -51,7 +53,7 @@ python3 run.py
 .\env\Scripts\activate
 py simple-text-generator-ui.py
 
-py run.py
+py train.py
 ~~~
 
 ### Features coming soon:
@@ -62,7 +64,7 @@ Model export/import (in progress)
 
 UI to archive project
 
-Run training inside UI
+Run training inside UI (in progress, Linux-only and buggy)
 
 Generate data from model without more training
 

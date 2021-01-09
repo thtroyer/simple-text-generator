@@ -337,7 +337,7 @@ class WindowManager:
         training_window.title("Training - simple-text-generator")
         training_window.geometry("800x600")
 
-        label = tk.Label(training_window, text="Output of run.py")
+        label = tk.Label(training_window, text="Output of train.py")
         label.pack(fill=tk.X)
 
         # todo - find Windows solution
@@ -350,7 +350,7 @@ class WindowManager:
             # todo - sizing needs work.  bottom part of xterm remains hidden
             p = subprocess.Popen(
                 ["xterm", "-into", str(xterm_frame_id), "-geometry", "120x40",
-                 '-e', 'source env/bin/activate; python3.8 run.py'],
+                 '-e', 'source env/bin/activate; python3.8 train.py'],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 cwd="/home/tom/code/simple-text-generator")
