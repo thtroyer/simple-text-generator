@@ -1,0 +1,4 @@
+tensorflow-gpu
+git+git://github.com/minimaxir/textgenrnn@master#egg=textgenrnn
+pyyaml
+chevron

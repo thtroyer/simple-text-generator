@@ -10,7 +10,7 @@ Tested on Ubuntu 16.04 with Python3.8.7.  (Windows needs retested)
 
 The following instructions are examples; adapt them for your needs.
 
-Use requirements.txt for CPU-based training and requirements-gpu.txt for GPU-based training.
+Use requirements.txt for CPU-based training and requirements-gpu.txt for GPU-based training.  GPU training may require additional dependencies based on your system and OS.
 
 ####Linux:
 
