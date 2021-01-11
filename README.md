@@ -6,13 +6,13 @@ Built in python, utilizing the textgenrrn library (tensorflow).
 ## Usage
 Tested on Ubuntu 16.04 with Python3.8.7.  (Windows needs retested)
 
-### Set up environment
+## Set up environment
 
 The following instructions are examples; adapt them for your needs.
 
-Use requirements.txt for CPU-based training and requirements-gpu.txt for GPU-based training.  GPU training may require additional dependencies based on your system and OS.
+Note: Project uses CPU-based training by default.  Additional dependencies (Tensorflow compatible CUDA libraries) are required to use GPU training.
 
-####Linux:
+###Linux:
 
 ~~~
 git clone git@github.com:thtroyer/simple-text-generator.git
@@ -22,7 +22,7 @@ source env/bin/activate
 python3 -m pip install -r requirements.txt
 ~~~
 
-####Windows:
+###Windows:
 Clone repository
 
 Run the following in cmd after navigating to root of cloned directory:
@@ -32,7 +32,7 @@ py -m venv env
 pip install -r requirements.txt
 ~~~
 
-### Running:
+## Running:
 
 Utilize `simple-text-generator-ui.py` to configure a project to run.  Projects are created and viewable in the projects/ directory.
 
@@ -40,7 +40,7 @@ Once a project is created, run the project by using `train.py`.  The trained mod
 
 If you encounter errors when attempting to train, make sure your virtual environment is activated.
 
-####Linux:
+###Linux:
 ~~~
 source env/bin/activate
 python3 simple-text-generator-ui.py
@@ -48,7 +48,7 @@ python3 simple-text-generator-ui.py
 python3 train.py
 ~~~
 
-####Windows (cmd):
+###Windows (cmd):
 ~~~
 .\env\Scripts\activate
 py simple-text-generator-ui.py
@@ -56,7 +56,7 @@ py simple-text-generator-ui.py
 py train.py
 ~~~
 
-### Features coming soon:
+## Features coming soon:
 
 GUI (in progress)
 
@@ -64,7 +64,7 @@ Model export/import (in progress)
 
 UI to archive project
 
-Run training inside UI (in progress, Linux-only and buggy)
+Run training inside UI (in progress, Linux-only, experimental)
 
 Generate data from model without more training
 
