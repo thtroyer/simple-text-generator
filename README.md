@@ -12,7 +12,7 @@ The following instructions are examples; adapt them for your needs.
 
 Note: Project uses CPU-based training by default.  Additional dependencies (Tensorflow compatible CUDA libraries) are required to use GPU training.
 
-###Linux:
+### Linux:
 
 ~~~
 git clone git@github.com:thtroyer/simple-text-generator.git
@@ -22,7 +22,7 @@ source env/bin/activate
 python3 -m pip install -r requirements.txt
 ~~~
 
-###Windows:
+### Windows:
 Clone repository
 
 Run the following in cmd after navigating to root of cloned directory:
@@ -40,7 +40,7 @@ Once a project is created, run the project by using `train.py`.  The trained mod
 
 If you encounter errors when attempting to train, make sure your virtual environment is activated.
 
-###Linux:
+### Linux:
 ~~~
 source env/bin/activate
 python3 simple-text-generator-ui.py
@@ -48,7 +48,7 @@ python3 simple-text-generator-ui.py
 python3 train.py
 ~~~
 
-###Windows (cmd):
+### Windows (cmd):
 ~~~
 .\env\Scripts\activate
 py simple-text-generator-ui.py
