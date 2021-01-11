@@ -46,14 +46,24 @@ def sort_jobs(jobs_to_sort):
 
 
 def train(jobs):
-    for job in jobs:
-        training_model = training.Train(job)
+    for job_to_train in jobs:
+        training_model = training.Train(job_to_train)
         training_model.run()
 
 
 if __name__ == "__main__":
     project_dirs = [f.path for f in os.scandir(project_dir) if f.is_dir()]
     jobs_to_run = create_jobs(project_dirs)
+
+    print("")
+    print('Found ' + str(len(jobs_to_run)) + " projects to train.")
+    print("")
+    if (len(jobs_to_run) == 0):
+        print('')
+        print('------------------------------------')
+        print("No projects found for training.  Ctrl+c to exit terminal.")
+        exit(0)
+
     sort_jobs(jobs_to_run)
     train(jobs_to_run)
 

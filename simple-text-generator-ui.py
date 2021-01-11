@@ -81,7 +81,7 @@ class WindowManager:
 
         tk.Button(
             main_frame,
-            text='Run jobs (Linux only)',
+            text='Run jobs (Linux only, experimental)',
             command=self.run_training,
             width=35
         ).pack()

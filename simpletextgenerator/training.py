@@ -7,16 +7,17 @@ from simpletextgenerator.job import Job
 
 
 class TrainingStatus:
-    NEW = 0
-    NEW_LOAD_MODEL = 10
-    STARTED = 20
-    FINISHED = 30
+    NEW = "NEW"
+    NEW_LOAD_MODEL = "NEW_LOAD_MODEL"
+    STARTED = "STARTED"
+    FINISHED = "FINISHED"
 
 
 class Train:
     # todo add model export
     # todo capture texgenrnn output (loss, etc) for logging
     # todo run until options (iterations? loss? time?)
+
     def __init__(self, job: Job):
         self.job = job
         self.status = job.status
@@ -24,6 +25,11 @@ class Train:
         self.iterations_run = job.iterations_run
         self.textgen = textgenrnn()
         self.initial_model_to_load = job.initial_model_to_load
+
+    @staticmethod
+    def create_dir(path):
+        if not os.path.exists(path):
+            os.makedirs(path)
 
     def save_lines_to_file(self, iteration, temperature, data):
         self.create_dir(self.job.output_dir)
@@ -40,10 +46,6 @@ class Train:
         file_handle.write("____________________________\n")
         file_handle.close()
 
-    def create_dir(self, path):
-        if not os.path.exists(path):
-            os.makedirs(path)
-
     def load_model(self, model_name):
         print("Loading model")
         path = f"{self.job.project_root_dir}/{self.job.job_name}/{model_name}"
@@ -53,7 +55,11 @@ class Train:
         self.textgen.load(path)
 
     def run(self):
+        print("")
+        print("Loading project " + self.job.job_name)
+
         if self.status == TrainingStatus.FINISHED:
+            print("Project already completed.")
             return
 
         if self.status == TrainingStatus.STARTED:
@@ -67,7 +73,7 @@ class Train:
             self.train_model()
             self.generate_text(i)
             self.save_model_iteration(i)
-            self.save_model("model_current")
+            self.save_model("current")
             self.iterations_run += 1
             self.update_state()
 
@@ -90,10 +96,11 @@ class Train:
 
     def save_model(self, model_name: str):
         print("Saving model current")
-        self.last_saved_model = model_name
+        model_file_name = "model_" + model_name
+        self.last_saved_model = model_file_name
         self.textgen.save(
             self.job.project_root_dir + "/" + self.job.job_name
-            + "/model_" + model_name + ".hdf5")
+            + "/" + model_file_name + ".hdf5")
 
     def save_model_iteration(self, i):
         print("Saving model")
@@ -104,7 +111,7 @@ class Train:
                 )
 
     def generate_text(self, i):
-        print("Generating text")
+        print("Generating text to output file.")
         if self.job.generate_every_n_generations > 0:
             if (i % self.job.generate_every_n_generations) == 0:
                 for temperature in self.job.temperatures_to_generate:
