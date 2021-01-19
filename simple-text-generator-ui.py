@@ -11,12 +11,14 @@ import subprocess
 
 from simpletextgenerator.training import TrainingStatus
 
-#todo add training data percent to UI
+
+# todo add training data percent to UI
 
 class WindowManager:
     def __init__(self):
         self.main_window = None
         self.new_job_window = None
+        self.edit_job_window = None
         self.new_job_load_model_window = None
         # fields in new_job_window
         self.number_of_iterations = None
@@ -58,8 +60,7 @@ class WindowManager:
         tk.Button(
             main_frame,
             text='Edit existing job',
-            command=quit,
-            state=tk.DISABLED,
+            command=self.draw_edit_existing_job_window,
             width=35
         ).pack()
 
@@ -123,7 +124,7 @@ class WindowManager:
         self.dropout.grid(row=2, column=1)
         tk.Label(model_frame, text="Training Data Percent, 0-1.0):").grid(row=3)
         self.training_data_percent = tk.Entry(model_frame)
-        self.training_data_percent .grid(row=3, column=1)
+        self.training_data_percent.grid(row=3, column=1)
         tk.Label(model_frame, text="Temperatures to generate:").grid(row=4)
         self.temperatures_to_generate = tk.Entry(model_frame)
         self.temperatures_to_generate.grid(row=4, column=1)
@@ -152,6 +153,95 @@ class WindowManager:
 
         top_frame.grid(row=0, column=0)
         model_frame.grid(row=1, column=0)
+        bottom_frame.grid(row=3, column=0)
+
+    def edit_existing_job_select_updated(self, selected_value):
+        # todo: read values from disk
+        self.selected_project_name.set(selected_value)
+        self.number_of_iterations.delete(0, tk.END)
+        self.number_of_iterations.insert(tk.END, 5)
+        self.dropout.delete(0, tk.END)
+        self.dropout.insert(tk.END, 0)
+        self.temperatures_to_generate.delete(0, tk.END)
+        self.temperatures_to_generate.insert(tk.END, "0.5, 1.0, 1.25")
+        self.items_to_generate_between_generations.delete(0, tk.END)
+        self.items_to_generate_between_generations.insert(tk.END, 50)
+        self.training_data_percent.delete(0, tk.END)
+        self.training_data_percent.insert(tk.END, "0.75")
+        self.generation_frequency.delete(0, tk.END)
+        self.generation_frequency.insert(tk.END, 1)
+        self.save_frequency.delete(0, tk.END)
+        self.save_frequency.insert(tk.END, 2)
+        self.items_to_generate_at_end.delete(0, tk.END)
+        self.items_to_generate_at_end.insert(tk.END, 500)
+
+    def draw_edit_existing_job_window(self):
+        if self.edit_job_window is not None:
+            self.edit_job_window = None
+
+        edit_job_window = tk.Tk()
+        edit_job_window.title("Edit existing job - simple-text-generator")
+        main_frame = tk.Frame(edit_job_window)
+        main_frame.grid()
+        top_frame = tk.Frame(main_frame)
+        tk.Label(top_frame, text="Project Name:").grid(row=0, column=0)
+        bottom_frame = tk.Frame(main_frame)
+        # todo read values from disk
+        option_list = [
+            "",
+            "option1",
+            "option2"
+        ]
+        self.selected_project_name = tk.StringVar()
+        self.selected_project_name.set(option_list[0])
+        self.project_name_select = tk.OptionMenu(top_frame,
+                                                 self.selected_project_name,
+                                                 *option_list,
+                                                 command=self.edit_existing_job_select_updated
+                                                 )
+
+        self.project_name_select.config(width=10)
+        self.project_name_select.grid(row=0, column=1)
+
+        tk.Button(bottom_frame, text='Cancel', command=self.back_new_job_window).grid(row=0, column=0)
+        tk.Button(bottom_frame, text='Save New Job', command=self.save_new_job_window).grid(row=0, column=1)
+        bottom_frame.grid()
+        self.edit_job_window = edit_job_window
+
+        model_frame = tk.Frame(main_frame, relief="raised", borderwidth=3)
+        model_frame.grid(row=1, column=0)
+        tk.Label(model_frame, text="Training file").grid(row=0, column=0)
+        self.button_open_training_file = tk.Button(model_frame, text="Select a file",
+                                                   command=self.set_training_file)
+        self.button_open_training_file.grid(row=0, column=1)
+
+        tk.Label(model_frame, text="Number of iterations:").grid(row=1, column=0)
+        self.number_of_iterations = tk.Entry(model_frame)
+        self.number_of_iterations.grid(row=1, column=1)
+        tk.Label(model_frame, text="Dropout (keep low, ~0-0.2):").grid(row=2)
+        self.dropout = tk.Entry(model_frame)
+        self.dropout.grid(row=2, column=1)
+        tk.Label(model_frame, text="Training Data Percent, 0-1.0):").grid(row=3)
+        self.training_data_percent = tk.Entry(model_frame)
+        self.training_data_percent.grid(row=3, column=1)
+        tk.Label(model_frame, text="Temperatures to generate:").grid(row=4)
+        self.temperatures_to_generate = tk.Entry(model_frame)
+        self.temperatures_to_generate.grid(row=4, column=1)
+        tk.Label(model_frame, text="Items to generate between generations:").grid(row=5)
+        self.items_to_generate_between_generations = tk.Entry(model_frame)
+        self.items_to_generate_between_generations.grid(row=5, column=1)
+        tk.Label(model_frame, text="Generate every _ generations:").grid(row=6)
+        self.generation_frequency = tk.Entry(model_frame)
+        self.generation_frequency.grid(row=6, column=1)
+        tk.Label(model_frame, text="Save model every _ generations:").grid(row=7)
+        self.save_frequency = tk.Entry(model_frame)
+        self.save_frequency.grid(row=7, column=1)
+        tk.Label(model_frame, text="Items to generate at end:").grid(row=8)
+        self.items_to_generate_at_end = tk.Entry(model_frame)
+        self.items_to_generate_at_end.grid(row=8, column=1)
+
+        top_frame.grid(row=0, column=0)
+        model_frame.grid(row=2, column=0)
         bottom_frame.grid(row=3, column=0)
 
     def draw_new_job_load_model_window(self):
@@ -193,7 +283,7 @@ class WindowManager:
         self.dropout.grid(row=3, column=1)
         tk.Label(model_frame, text="Training Data Percent, 0-1.0):").grid(row=4)
         self.training_data_percent = tk.Entry(model_frame)
-        self.training_data_percent .grid(row=4, column=1)
+        self.training_data_percent.grid(row=4, column=1)
         tk.Label(model_frame, text="Temperatures to generate:").grid(row=5)
         self.temperatures_to_generate = tk.Entry(model_frame)
         self.temperatures_to_generate.grid(row=5, column=1)
