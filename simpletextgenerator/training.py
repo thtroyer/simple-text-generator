@@ -89,9 +89,7 @@ class Train:
     def generate_final_text(self):
         print("Generating final text")
         for temperature in self.job.temperatures_to_generate:
-            generated = self.textgen.generate(
-                n=self.job.items_to_generate_at_end, return_as_list=True, temperature=temperature
-            )
+            generated = self.textgen.generate(n=self.job.items_to_generate_at_end, return_as_list=True, temperature=temperature)
             self.save_lines_to_file("last", temperature, generated)
 
     def save_model(self, model_name: str):
@@ -115,8 +113,10 @@ class Train:
         if self.job.generate_every_n_generations > 0:
             if (i % self.job.generate_every_n_generations) == 0:
                 for temperature in self.job.temperatures_to_generate:
-                    generated = self.textgen.generate(n=self.job.items_to_generate_each_generation,
-                                                      return_as_list=True, temperature=temperature)
+                    try:
+                        generated = self.textgen.generate(n=self.job.items_to_generate_each_generation, return_as_list=True, temperature=temperature)
+                    except KeyError:
+                        continue
                     self.save_lines_to_file(i * self.job.generate_every_n_generations, temperature, generated)
 
     def train_model(self):
