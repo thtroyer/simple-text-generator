@@ -1,5 +1,6 @@
 import os
 import pathlib
+from os.path import splitext
 from shutil import copyfile
 from tkinter import messagebox
 from tkinter import filedialog
@@ -18,6 +19,7 @@ class WindowManager:
     def __init__(self):
         self.main_window = None
         self.new_job_window = None
+        self.new_batch_job_window = None
         self.edit_job_window = None
         self.new_job_load_model_window = None
         # fields in new_job_window
@@ -33,6 +35,7 @@ class WindowManager:
         self.button_open_training_file = None
         self.button_open_model_file = None
         self.training_file = None
+        self.batch_training_files = None
         self.training_file_origin_path = None
         self.model_to_load = None
         self.model_to_load_origin_path = None
@@ -47,6 +50,13 @@ class WindowManager:
             main_frame,
             text='Create new job',
             command=self.draw_new_job_window,
+            width=35
+        ).pack()
+
+        tk.Button(
+            main_frame,
+            text='Create new batch job',
+            command=self.draw_new_batch_job_window,
             width=35
         ).pack()
 
@@ -80,12 +90,12 @@ class WindowManager:
             width=35
         ).pack()
 
-        tk.Button(
-            main_frame,
-            text='Run jobs (Linux only, experimental)',
-            command=self.run_training,
-            width=35
-        ).pack()
+        # tk.Button(
+        #     main_frame,
+        #     text='Run jobs (Linux only, experimental)',
+        #     command=self.run_training,
+        #     width=35
+        # ).pack()
 
         main_window.mainloop()
         self.main_window = main_window
@@ -114,6 +124,69 @@ class WindowManager:
         tk.Label(model_frame, text="Training file").grid(row=0, column=0)
         self.button_open_training_file = tk.Button(model_frame, text="Select a file",
                                                    command=self.set_training_file)
+        self.button_open_training_file.grid(row=0, column=1)
+
+        tk.Label(model_frame, text="Number of iterations:").grid(row=1, column=0)
+        self.number_of_iterations = tk.Entry(model_frame)
+        self.number_of_iterations.grid(row=1, column=1)
+        tk.Label(model_frame, text="Dropout (keep low, ~0-0.2):").grid(row=2)
+        self.dropout = tk.Entry(model_frame)
+        self.dropout.grid(row=2, column=1)
+        tk.Label(model_frame, text="Training Data Percent, 0-1.0):").grid(row=3)
+        self.training_data_percent = tk.Entry(model_frame)
+        self.training_data_percent.grid(row=3, column=1)
+        tk.Label(model_frame, text="Temperatures to generate:").grid(row=4)
+        self.temperatures_to_generate = tk.Entry(model_frame)
+        self.temperatures_to_generate.grid(row=4, column=1)
+        tk.Label(model_frame, text="Items to generate between generations:").grid(row=5)
+        self.items_to_generate_between_generations = tk.Entry(model_frame)
+        self.items_to_generate_between_generations.grid(row=5, column=1)
+        tk.Label(model_frame, text="Generate every _ generations:").grid(row=6)
+        self.generation_frequency = tk.Entry(model_frame)
+        self.generation_frequency.grid(row=6, column=1)
+        tk.Label(model_frame, text="Save model every _ generations:").grid(row=7)
+        self.save_frequency = tk.Entry(model_frame)
+        self.save_frequency.grid(row=7, column=1)
+        tk.Label(model_frame, text="Items to generate at end:").grid(row=8)
+        self.items_to_generate_at_end = tk.Entry(model_frame)
+        self.items_to_generate_at_end.grid(row=8, column=1)
+
+        # Set some sane defaults:
+        self.number_of_iterations.insert(tk.END, 5)
+        self.dropout.insert(tk.END, 0)
+        self.temperatures_to_generate.insert(tk.END, "0.5, 1.0, 1.25")
+        self.items_to_generate_between_generations.insert(tk.END, 50)
+        self.training_data_percent.insert(tk.END, "0.75")
+        self.generation_frequency.insert(tk.END, 1)
+        self.save_frequency.insert(tk.END, 2)
+        self.items_to_generate_at_end.insert(tk.END, 500)
+
+        top_frame.grid(row=0, column=0)
+        model_frame.grid(row=1, column=0)
+        bottom_frame.grid(row=3, column=0)
+
+
+    def draw_new_batch_job_window(self):
+        if self.new_batch_job_window is not None:
+            self.new_batch_job_window = None
+
+        new_job_window = tk.Tk()
+        new_job_window.title("Create New Batch Job - simple-text-generator")
+        main_frame = tk.Frame(new_job_window)
+        main_frame.grid()
+        top_frame = tk.Frame(main_frame)
+        bottom_frame = tk.Frame(main_frame)
+
+        tk.Button(bottom_frame, text='Cancel', command=self.back_new_job_window).grid(row=0, column=0)
+        tk.Button(bottom_frame, text='Save New Job', command=self.save_new_batch_job_window).grid(row=0, column=1)
+        bottom_frame.grid()
+        self.new_job_window = new_job_window
+
+        model_frame = tk.Frame(main_frame, relief="raised", borderwidth=3)
+        model_frame.grid(row=1, column=0)
+        tk.Label(model_frame, text="Training file").grid(row=0, column=0)
+        self.button_open_training_file = tk.Button(model_frame, text="Select a file",
+                                                   command=self.set_training_file_batch)
         self.button_open_training_file.grid(row=0, column=1)
 
         tk.Label(model_frame, text="Number of iterations:").grid(row=1, column=0)
@@ -333,6 +406,25 @@ class WindowManager:
             print(e)
             raise e
 
+
+    def save_new_batch_job_window(self):
+        try:
+            for training_file in self.batch_training_files:
+                self.training_file_origin_path = training_file
+                file_name = os.path.basename(training_file)
+                self.training_file = file_name
+                project_name = splitext(file_name)[0]
+                project_path = "projects/" + project_name
+                self.create_new_project_dir(project_path)
+                self.create_config_file(project_path)
+                self.create_state_file(project_path)
+                self.copy_training_file(project_path)
+            self.new_job_window.destroy()
+        except Exception as e:
+            # todo remove
+            print(e)
+            raise e
+
     def save_new_job_load_model_window(self):
         try:
             project_path = "projects/" + self.project_name.get()
@@ -375,6 +467,12 @@ class WindowManager:
         self.training_file_origin_path = self.open_file_dialog("txt")
         self.training_file = Path(self.training_file_origin_path).name
         self.button_open_training_file['text'] = self.training_file
+
+    def set_training_file_batch(self):
+        # root = tk.Tk()
+        self.batch_training_files = tk.filedialog.askopenfilenames(title='Choose a file')
+
+        # self.button_open_model_file['text'] = self.model_to_load
 
     def set_model_file(self):
         self.model_to_load_origin_path = self.open_file_dialog("hdf5")
