@@ -10,7 +10,7 @@ from pathlib import Path
 from tkinter.messagebox import showwarning
 import subprocess
 
-import train
+import run_training
 from simpletextgenerator.training import TrainingStatus
 
 # This is my first tkinter project.
@@ -236,7 +236,7 @@ class WindowManager:
     def edit_existing_job_select_updated(self, selected_value):
         self.project_name_edit_text = selected_value
         self.selected_project_name.set(selected_value)
-        loaded_job = train.create_job(f"./projects/{selected_value}")
+        loaded_job = run_training.create_job(f"./projects/{selected_value}")
         temperature_strings = ['{:.2f}'.format(temp) for temp in loaded_job.temperatures_to_generate]
         temperature_string = ",".join(temperature_strings)
 
@@ -545,7 +545,7 @@ class WindowManager:
         training_window.title("Training - simple-text-generator")
         training_window.geometry("800x600")
 
-        label = tk.Label(training_window, text="Output of train.py")
+        label = tk.Label(training_window, text="Output of run_training.py")
         label.pack(fill=tk.X)
 
         # todo - find Windows solution
@@ -558,7 +558,7 @@ class WindowManager:
             # todo - sizing needs work.  bottom part of xterm remains hidden
             p = subprocess.Popen(
                 ["xterm", "-into", str(xterm_frame_id), "-geometry", "120x40",
-                 '-e', 'source env/bin/activate; python3.8 train.py'],
+                 '-e', 'source env/bin/activate; python3.8 run_training.py'],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 cwd="/home/tom/code/simple-text-generator")

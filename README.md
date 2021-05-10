@@ -36,7 +36,7 @@ pip install -r requirements.txt
 
 Utilize `simple-text-generator-ui.py` to configure a project to run.  Projects are created and viewable in the projects/ directory.
 
-Once a project is created, run the project by using `train.py`.  The trained model is saved off at the interval configured.  `train.py` can be killed at any time and resumed later from the last saved model.
+Once a project is created, run the project by using `run_training.py`.  The trained model is saved off at the interval configured.  `run_training.py` can be killed at any time and resumed later from the last saved model.
 
 If you encounter errors when attempting to train, make sure your virtual environment is activated.
 
@@ -45,7 +45,7 @@ If you encounter errors when attempting to train, make sure your virtual environ
 source env/bin/activate
 python3 simple-text-generator-ui.py
 
-python3 train.py
+python3 run_training.py
 ~~~
 
 ### Windows (cmd):
@@ -53,7 +53,7 @@ python3 train.py
 .\env\Scripts\activate
 py simple-text-generator-ui.py
 
-py train.py
+py run_training.py
 ~~~
 
 ## Features coming soon:
