@@ -3,7 +3,7 @@ import os
 import shutil
 
 from simpletextgenerator import training
-from simpletextgenerator import job
+from simpletextgenerator.models import job
 
 project_dir = "./projects"
 to_run_dir = "to_run"
@@ -22,12 +22,14 @@ def create_project_from_files(input_files):
         shutil.copyfile("templates/config_defaults.yaml", new_project_dir + "/templates.yaml")
 
 
-def create_jobs(dirs):
+def create_jobs(dirs) -> list:
     new_jobs = []
     for project in dirs:
-        new_job = create_job(project)
-        if new_job is not None:
+        try:
+            new_job = create_job(project)
             new_jobs.append(new_job)
+        except RuntimeError:
+            continue
     return new_jobs
 
 
@@ -37,27 +39,27 @@ def create_job(project) -> job.Job:
     config_data, state_data = None, None
 
     if project == "./projects/archive":
-        return None
+        raise RuntimeError("skip archive")
 
     try:
         with open(project + "/config.yaml", 'r') as config:
             config_data = yaml.safe_load(config)
-    except FileNotFoundError:
+    except FileNotFoundError as e:
         print(f"Missing config.yaml. Unable to build {project} job.")
-        return None
+        raise e
 
     try:
         with open(project + "/state.yaml", 'r') as state:
             state_data = yaml.safe_load(state)
-    except FileNotFoundError:
+    except FileNotFoundError as e:
         print(f"Missing state.yaml. Unable to build {project} job.")
-        return None
+        raise e
 
     return job.Job(config_data, state_data, project_root_path, project_name, to_run_dir, output_dir)
 
 
 def sort_jobs(jobs_to_sort):
-    jobs_to_sort.sort(key=lambda x: x.priority, reverse=True)
+    jobs_to_sort.sort(key=lambda x: x.config.priority, reverse=True)
 
 
 def train(jobs):

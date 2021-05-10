@@ -237,25 +237,26 @@ class WindowManager:
         self.project_name_edit_text = selected_value
         self.selected_project_name.set(selected_value)
         loaded_job = run_training.create_job(f"./projects/{selected_value}")
-        temperature_strings = ['{:.2f}'.format(temp) for temp in loaded_job.temperatures_to_generate]
+        loaded_config = loaded_job.config
+        temperature_strings = ['{:.2f}'.format(temp) for temp in loaded_config.temperatures_to_generate]
         temperature_string = ",".join(temperature_strings)
 
         self.number_of_iterations.delete(0, tk.END)
-        self.number_of_iterations.insert(tk.END, loaded_job.num_loops)
+        self.number_of_iterations.insert(tk.END, loaded_config.num_loops)
         self.dropout.delete(0, tk.END)
-        self.dropout.insert(tk.END, loaded_job.num_loops)
+        self.dropout.insert(tk.END, loaded_config.num_loops)
         self.temperatures_to_generate.delete(0, tk.END)
         self.temperatures_to_generate.insert(tk.END, temperature_string)
         self.items_to_generate_between_generations.delete(0, tk.END)
-        self.items_to_generate_between_generations.insert(tk.END, loaded_job.items_to_generate_each_generation)
+        self.items_to_generate_between_generations.insert(tk.END, loaded_config.items_to_generate_each_generation)
         self.training_data_percent.delete(0, tk.END)
-        self.training_data_percent.insert(tk.END, loaded_job.training_data_percent)
+        self.training_data_percent.insert(tk.END, loaded_config.training_data_percent)
         self.generation_frequency.delete(0, tk.END)
-        self.generation_frequency.insert(tk.END, loaded_job.generate_every_n_generations)
+        self.generation_frequency.insert(tk.END, loaded_config.generate_every_n_generations)
         self.save_frequency.delete(0, tk.END)
-        self.save_frequency.insert(tk.END, loaded_job.save_model_every_n_generations)
+        self.save_frequency.insert(tk.END, loaded_config.save_model_every_n_generations)
         self.items_to_generate_at_end.delete(0, tk.END)
-        self.items_to_generate_at_end.insert(tk.END, loaded_job.items_to_generate_at_end)
+        self.items_to_generate_at_end.insert(tk.END, loaded_config.items_to_generate_at_end)
 
     def draw_edit_existing_job_window(self):
         if self.edit_job_window is not None:
