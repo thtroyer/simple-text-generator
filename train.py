@@ -24,21 +24,36 @@ def create_project_from_files(input_files):
 
 def create_jobs(dirs):
     new_jobs = []
-    project_root_path = os.path.abspath(project_dir)
     for project in dirs:
-        project_name = os.path.basename(project)
-        if project_name == 'archive':
-            continue
-        try:
-            with open(project + "/config.yaml", 'r') as config:
-                config_data = yaml.safe_load(config)
-            with open(project + "/state.yaml", 'r') as state:
-                state_data = yaml.safe_load(state)
-        except FileNotFoundError:
-            print(f"Missing config.yaml or state.yaml. Skipping {project} directory")
-            continue
-        new_jobs.append(job.Job(config_data, state_data, project_root_path, project_name, to_run_dir, output_dir))
+        new_job = create_job(project)
+        if new_job is not None:
+            new_jobs.append(new_job)
     return new_jobs
+
+
+def create_job(project):
+    project_root_path = os.path.abspath(project_dir)
+    project_name = os.path.basename(project)
+    config_data, state_data = None, None
+
+    if project == "./projects/archive":
+        return None
+
+    try:
+        with open(project + "/config.yaml", 'r') as config:
+            config_data = yaml.safe_load(config)
+    except FileNotFoundError:
+        print(f"Missing config.yaml. Unable to build {project} job.")
+        return None
+
+    try:
+        with open(project + "/state.yaml", 'r') as state:
+            state_data = yaml.safe_load(state)
+    except FileNotFoundError:
+        print(f"Missing state.yaml. Unable to build {project} job.")
+        return None
+
+    return job.Job(config_data, state_data, project_root_path, project_name, to_run_dir, output_dir)
 
 
 def sort_jobs(jobs_to_sort):

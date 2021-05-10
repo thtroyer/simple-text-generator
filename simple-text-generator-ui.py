@@ -10,8 +10,12 @@ from pathlib import Path
 from tkinter.messagebox import showwarning
 import subprocess
 
+import train
 from simpletextgenerator.training import TrainingStatus
 
+# This is my first tkinter project.
+# I highly recommend not using this UI as a good example of anything.  It is currently
+# a mess.  Maybe eventually it'll be good, but I suggest avoid looking at this file for now.
 
 # todo add training data percent to UI
 
@@ -25,6 +29,7 @@ class WindowManager:
         # fields in new_job_window
         self.number_of_iterations = None
         self.project_name = None
+        self.project_name_edit_text = None
         self.dropout = None
         self.temperatures_to_generate = None
         self.items_to_generate_between_generations = None
@@ -229,24 +234,26 @@ class WindowManager:
         bottom_frame.grid(row=3, column=0)
 
     def edit_existing_job_select_updated(self, selected_value):
-        # todo: read values from disk
+        self.project_name_edit_text = selected_value
         self.selected_project_name.set(selected_value)
+        loaded_job = train.create_job(f"./projects/{selected_value}")
+
         self.number_of_iterations.delete(0, tk.END)
-        self.number_of_iterations.insert(tk.END, 5)
+        self.number_of_iterations.insert(tk.END, loaded_job.num_loops)
         self.dropout.delete(0, tk.END)
-        self.dropout.insert(tk.END, 0)
+        self.dropout.insert(tk.END, loaded_job.num_loops)
         self.temperatures_to_generate.delete(0, tk.END)
-        self.temperatures_to_generate.insert(tk.END, "0.5, 1.0, 1.25")
+        self.temperatures_to_generate.insert(tk.END, loaded_job.temperatures_to_generate)
         self.items_to_generate_between_generations.delete(0, tk.END)
-        self.items_to_generate_between_generations.insert(tk.END, 50)
+        self.items_to_generate_between_generations.insert(tk.END, loaded_job.items_to_generate_each_generation)
         self.training_data_percent.delete(0, tk.END)
-        self.training_data_percent.insert(tk.END, "0.75")
+        self.training_data_percent.insert(tk.END, loaded_job.training_data_percent)
         self.generation_frequency.delete(0, tk.END)
-        self.generation_frequency.insert(tk.END, 1)
+        self.generation_frequency.insert(tk.END, loaded_job.generate_every_n_generations)
         self.save_frequency.delete(0, tk.END)
-        self.save_frequency.insert(tk.END, 2)
+        self.save_frequency.insert(tk.END, loaded_job.save_model_every_n_generations)
         self.items_to_generate_at_end.delete(0, tk.END)
-        self.items_to_generate_at_end.insert(tk.END, 500)
+        self.items_to_generate_at_end.insert(tk.END, loaded_job.items_to_generate_at_end)
 
     def draw_edit_existing_job_window(self):
         if self.edit_job_window is not None:
@@ -259,25 +266,21 @@ class WindowManager:
         top_frame = tk.Frame(main_frame)
         tk.Label(top_frame, text="Project Name:").grid(row=0, column=0)
         bottom_frame = tk.Frame(main_frame)
-        # todo read values from disk
-        option_list = [
-            "",
-            "option1",
-            "option2"
-        ]
+        option_list = self.get_projects_from_disk()
         self.selected_project_name = tk.StringVar()
         self.selected_project_name.set(option_list[0])
-        self.project_name_select = tk.OptionMenu(top_frame,
-                                                 self.selected_project_name,
-                                                 *option_list,
-                                                 command=self.edit_existing_job_select_updated
-                                                 )
+        self.project_name_select = tk.OptionMenu(
+            top_frame,
+            self.selected_project_name,
+            *option_list,
+            command=self.edit_existing_job_select_updated
+        )
 
         self.project_name_select.config(width=10)
         self.project_name_select.grid(row=0, column=1)
 
         tk.Button(bottom_frame, text='Cancel', command=self.back_new_job_window).grid(row=0, column=0)
-        tk.Button(bottom_frame, text='Save New Job', command=self.save_new_job_window).grid(row=0, column=1)
+        tk.Button(bottom_frame, text='Edit Job', command=self.save_edit_job_window).grid(row=0, column=1)
         bottom_frame.grid()
         self.edit_job_window = edit_job_window
 
@@ -406,6 +409,20 @@ class WindowManager:
             print(e)
             raise e
 
+    def save_edit_job_window(self):
+        if self.project_name_edit_text is None:
+            raise Exception("No project selected")
+
+        try:
+            project_path = "projects/" + self.project_name_edit_text
+            self.create_config_file(project_path)
+            self.create_state_file(project_path)
+            self.edit_job_window.destroy()
+        except Exception as e:
+            # todo remove
+            print(e)
+            raise e
+
 
     def save_new_batch_job_window(self):
         try:
@@ -417,6 +434,7 @@ class WindowManager:
                 project_path = "projects/" + project_name
                 self.create_new_project_dir(project_path)
                 self.create_config_file(project_path)
+                self.training_file = file_name
                 self.create_state_file(project_path)
                 self.copy_training_file(project_path)
             self.new_job_window.destroy()
@@ -547,6 +565,16 @@ class WindowManager:
             raise SystemExit
 
         training_window.mainloop()
+
+    def get_projects_from_disk(self):
+        project_path = 'projects/'
+        project_list = []
+        for path in os.listdir(project_path):
+            if os.path.isdir(os.path.join(project_path, path)):
+                project_list.append(path)
+
+        project_list.remove("archive")
+        return project_list
 
 
 if __name__ == "__main__":

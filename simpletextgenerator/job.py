@@ -2,8 +2,7 @@
 class Job:
     def __init__(self, config_data, state_data, project_root_dir, job_name, input_folder, output_folder):
         # from config.yaml
-        self.training_file = project_root_dir + '/' + job_name + '/' \
-                             + config_data['file']['training_file']
+        self.training_file = project_root_dir + '/' + job_name + '/' + config_data['file']['training_file']
         self.output_file = project_root_dir + "/" + job_name + "/output.txt"
         self.output_dir = project_root_dir + "/"
         self.num_loops = config_data['training']['num_loops']
