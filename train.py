@@ -31,7 +31,7 @@ def create_jobs(dirs):
     return new_jobs
 
 
-def create_job(project):
+def create_job(project) -> job.Job:
     project_root_path = os.path.abspath(project_dir)
     project_name = os.path.basename(project)
     config_data, state_data = None, None

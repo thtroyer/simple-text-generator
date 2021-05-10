@@ -237,13 +237,15 @@ class WindowManager:
         self.project_name_edit_text = selected_value
         self.selected_project_name.set(selected_value)
         loaded_job = train.create_job(f"./projects/{selected_value}")
+        temperature_strings = ['{:.2f}'.format(temp) for temp in loaded_job.temperatures_to_generate]
+        temperature_string = ",".join(temperature_strings)
 
         self.number_of_iterations.delete(0, tk.END)
         self.number_of_iterations.insert(tk.END, loaded_job.num_loops)
         self.dropout.delete(0, tk.END)
         self.dropout.insert(tk.END, loaded_job.num_loops)
         self.temperatures_to_generate.delete(0, tk.END)
-        self.temperatures_to_generate.insert(tk.END, loaded_job.temperatures_to_generate)
+        self.temperatures_to_generate.insert(tk.END, temperature_string)
         self.items_to_generate_between_generations.delete(0, tk.END)
         self.items_to_generate_between_generations.insert(tk.END, loaded_job.items_to_generate_each_generation)
         self.training_data_percent.delete(0, tk.END)
