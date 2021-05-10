@@ -8,16 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - UI cleanup
 
-## [0.2.0] - (master, unreleased)
+## [0.2.0] - 20201-05-09
 ### Added
 - Edit project functionality
 - Batch functionality
 
-## [0.1.1] - 2020-04-28
+## [0.1.1] - 2021-04-28
 ### Added
 - Changelog
 ### Fixed
 - Fix for crash during training
 
-## [0.1.0] - 2020-01-10
+## [0.1.0] - 2021-01-10
 First "release"
