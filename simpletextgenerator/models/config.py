@@ -1,11 +1,14 @@
 from dataclasses import dataclass
+from typing import IO
+import chevron
 
 
 @dataclass
 class Config:
+    # todo: Figure out what to do with derived values used by training
     training_file: str
-    output_file: str
-    output_dir: str
+    output_file: str  # derived
+    output_dir: str  # derived
     num_loops: str
     priority: str
     temperatures_to_generate: list
@@ -21,8 +24,24 @@ class Config:
     training_data_percent: str
     initial_model_to_load: str
 
+    def render(self, mustache_file: IO) -> str:
+        return (chevron.render(mustache_file, {
+            'priority': 0,
+            'training_file': self.training_file,
+            'number_of_iterations': self.num_loops,
+            'dropout': self.dropout,
+            'training_data_percent': self.training_data_percent,
+            'temperatures': self.temperatures_to_generate,
+            'items_to_generate_between_iterations': self.items_to_generate_each_generation,
+            'generate_every_n_generations': self.generate_every_n_generations,
+            'save_model_every_n_generations': self.save_model_every_n_generations,
+            'items_to_generate_at_end': self.items_to_generate_at_end,
+            'model_to_load': f"m_{self.initial_model_to_load}"
+        }))
+
 
 def create_config(config_data, project_root_dir, job_name, input_folder, output_folder) -> Config:
+    """Factory method to help create a Config object, used by training code """
     training_file = project_root_dir + '/' + job_name + '/' + config_data['file']['training_file']
     output_file = project_root_dir + "/" + job_name + "/output.txt"
     output_dir = project_root_dir + "/"

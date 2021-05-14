@@ -11,6 +11,7 @@ from tkinter.messagebox import showwarning
 import subprocess
 
 import run_training
+from simpletextgenerator.models.config import Config
 from simpletextgenerator.training import TrainingStatus
 
 # This is my first tkinter project.
@@ -462,19 +463,26 @@ class WindowManager:
 
     def render_config_file_text(self):
         with open('templates/config.yml.mustache', 'r') as f:
-            return (chevron.render(f, {
-                'priority': 0,
-                'training_file': self.training_file,
-                'number_of_iterations': self.number_of_iterations.get(),
-                'dropout': self.dropout.get(),
-                'training_data_percent': self.training_data_percent.get(),
-                'temperatures': map(str.strip, self.temperatures_to_generate.get().split(',')),
-                'items_to_generate_between_iterations': self.items_to_generate_between_generations.get(),
-                'generate_every_n_generations': self.generation_frequency.get(),
-                'save_model_every_n_generations': self.save_frequency.get(),
-                'items_to_generate_at_end': self.items_to_generate_at_end.get(),
-                'model_to_load': f"m_{self.model_to_load}"
-            }))
+            config = Config(
+                training_file=self.training_file,
+                output_file="",
+                output_dir="",
+                num_loops=self.number_of_iterations.get(),
+                priority="0",
+                temperatures_to_generate=list(map(str.strip, self.temperatures_to_generate.get().split(','))),
+                project_root_dir="",
+                job_name="",
+                input_folder="",
+                output_folder="",
+                items_to_generate_each_generation=self.items_to_generate_between_generations.get(),
+                items_to_generate_at_end=self.items_to_generate_at_end.get(),
+                generate_every_n_generations=self.generation_frequency.get(),
+                save_model_every_n_generations=self.save_frequency.get(),
+                dropout=self.dropout.get(),
+                training_data_percent=self.training_data_percent.get(),
+                initial_model_to_load=self.model_to_load
+            )
+            return config.render(f)
 
     def create_config_file(self, path):
         with open(path + '/config.yaml', 'w') as f:
