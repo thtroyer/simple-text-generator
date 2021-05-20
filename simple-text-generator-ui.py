@@ -14,6 +14,7 @@ import run_training
 from simpletextgenerator.models.config import Config
 from simpletextgenerator.training import TrainingStatus
 
+
 # This is my first tkinter project.
 # I highly recommend not using this UI as a good example of anything.  It is currently
 # a mess.  Maybe eventually it'll be good, but I suggest avoid looking at this file for now.
@@ -170,7 +171,6 @@ class WindowManager:
         top_frame.grid(row=0, column=0)
         model_frame.grid(row=1, column=0)
         bottom_frame.grid(row=3, column=0)
-
 
     def draw_new_batch_job_window(self):
         if self.new_batch_job_window is not None:
@@ -426,7 +426,6 @@ class WindowManager:
             # todo remove
             print(e)
             raise e
-
 
     def save_new_batch_job_window(self):
         try:
