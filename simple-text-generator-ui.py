@@ -1,6 +1,5 @@
 import os
 import pathlib
-from os.path import splitext
 from shutil import copyfile
 from tkinter import filedialog
 import tkinter as tk
@@ -9,18 +8,16 @@ from pathlib import Path
 from tkinter.messagebox import showwarning
 import subprocess
 
-import run_training
 from simpletextgenerator.models.config import Config
 from simpletextgenerator.training import TrainingStatus
-from simpletextgenerator.ui import new_job
+from simpletextgenerator.ui import new_job, edit_job
 
 
 # This is my first tkinter project.
 # I highly recommend not using this UI as a good example of anything.  It is currently
-# a mess.  Maybe eventually it'll be good, but I suggest avoid looking at this file for now.
+# a mess.  Maybe eventually it'll be good, but I suggest avoid looking at the UI portion for now.
 
 # todo add training data percent to UI
-
 
 class WindowManager:
     def __init__(self):
@@ -78,7 +75,7 @@ class WindowManager:
         tk.Button(
             main_frame,
             text='Edit existing job',
-            command=self.draw_edit_existing_job_window,
+            command=edit_job.draw_edit_existing_job_window,
             width=35
         ).pack()
 
@@ -107,111 +104,6 @@ class WindowManager:
 
         main_window.mainloop()
         self.main_window = main_window
-
-    def edit_existing_job_select_updated(self, selected_value):
-        self.project_name_edit_text = selected_value
-        self.selected_project_name.set(selected_value)
-        loaded_job = run_training.create_job(f"./projects/{selected_value}")
-        loaded_config = loaded_job.config
-        temperature_strings = ['{:.2f}'.format(temp) for temp in loaded_config.temperatures_to_generate]
-        temperature_string = ",".join(temperature_strings)
-
-        self.number_of_iterations.delete(0, tk.END)
-        self.number_of_iterations.insert(tk.END, loaded_config.num_loops)
-        self.dropout.delete(0, tk.END)
-        self.dropout.insert(tk.END, loaded_config.num_loops)
-        self.temperatures_to_generate.delete(0, tk.END)
-        self.temperatures_to_generate.insert(tk.END, temperature_string)
-        self.items_to_generate_between_generations.delete(0, tk.END)
-        self.items_to_generate_between_generations.insert(tk.END, loaded_config.items_to_generate_each_generation)
-        self.training_data_percent.delete(0, tk.END)
-        self.training_data_percent.insert(tk.END, loaded_config.training_data_percent)
-        self.generation_frequency.delete(0, tk.END)
-        self.generation_frequency.insert(tk.END, loaded_config.generate_every_n_generations)
-        self.save_frequency.delete(0, tk.END)
-        self.save_frequency.insert(tk.END, loaded_config.save_model_every_n_generations)
-        self.items_to_generate_at_end.delete(0, tk.END)
-        self.items_to_generate_at_end.insert(tk.END, loaded_config.items_to_generate_at_end)
-
-    def draw_edit_existing_job_window(self):
-        if self.edit_job_window is not None:
-            self.edit_job_window = None
-
-        edit_job_window = tk.Tk()
-        edit_job_window.title("Edit existing job - simple-text-generator")
-        main_frame = tk.Frame(edit_job_window)
-        main_frame.grid()
-        top_frame = tk.Frame(main_frame)
-        tk.Label(top_frame, text="Project Name:").grid(row=0, column=0)
-        bottom_frame = tk.Frame(main_frame)
-        option_list = self.get_projects_from_disk()
-        self.selected_project_name = tk.StringVar()
-        self.selected_project_name.set(option_list[0])
-        self.project_name_select = tk.OptionMenu(
-            top_frame,
-            self.selected_project_name,
-            *option_list,
-            command=self.edit_existing_job_select_updated
-        )
-
-        self.project_name_select.config(width=10)
-        self.project_name_select.grid(row=0, column=1)
-
-        tk.Button(bottom_frame, text='Cancel', command=self.back_new_job_window).grid(row=0, column=0)
-        tk.Button(bottom_frame, text='Edit Job', command=self.save_edit_job_window).grid(row=0, column=1)
-        bottom_frame.grid()
-        self.edit_job_window = edit_job_window
-
-        model_frame = tk.Frame(main_frame, relief="raised", borderwidth=3)
-        model_frame.grid(row=1, column=0)
-        tk.Label(model_frame, text="Training file").grid(row=0, column=0)
-        self.button_open_training_file = tk.Button(model_frame, text="Select a file",
-                                                   command=self.set_training_file)
-        self.button_open_training_file.grid(row=0, column=1)
-
-        tk.Label(model_frame, text="Number of iterations:").grid(row=1, column=0)
-        self.number_of_iterations = tk.Entry(model_frame)
-        self.number_of_iterations.grid(row=1, column=1)
-        tk.Label(model_frame, text="Dropout (keep low, ~0-0.2):").grid(row=2)
-        self.dropout = tk.Entry(model_frame)
-        self.dropout.grid(row=2, column=1)
-        tk.Label(model_frame, text="Training Data Percent, 0-1.0):").grid(row=3)
-        self.training_data_percent = tk.Entry(model_frame)
-        self.training_data_percent.grid(row=3, column=1)
-        tk.Label(model_frame, text="Temperatures to generate:").grid(row=4)
-        self.temperatures_to_generate = tk.Entry(model_frame)
-        self.temperatures_to_generate.grid(row=4, column=1)
-        tk.Label(model_frame, text="Items to generate between generations:").grid(row=5)
-        self.items_to_generate_between_generations = tk.Entry(model_frame)
-        self.items_to_generate_between_generations.grid(row=5, column=1)
-        tk.Label(model_frame, text="Generate every _ generations:").grid(row=6)
-        self.generation_frequency = tk.Entry(model_frame)
-        self.generation_frequency.grid(row=6, column=1)
-        tk.Label(model_frame, text="Save model every _ generations:").grid(row=7)
-        self.save_frequency = tk.Entry(model_frame)
-        self.save_frequency.grid(row=7, column=1)
-        tk.Label(model_frame, text="Items to generate at end:").grid(row=8)
-        self.items_to_generate_at_end = tk.Entry(model_frame)
-        self.items_to_generate_at_end.grid(row=8, column=1)
-
-        top_frame.grid(row=0, column=0)
-        model_frame.grid(row=2, column=0)
-        bottom_frame.grid(row=3, column=0)
-
-    def save_edit_job_window(self):
-        if self.project_name_edit_text is None:
-            raise Exception("No project selected")
-
-        try:
-            project_path = "projects/" + self.project_name_edit_text
-            self.create_config_file(project_path)
-            self.create_state_file(project_path)
-            self.edit_job_window.destroy()
-        except Exception as e:
-            # todo remove
-            print(e)
-            raise e
-
 
     def render_config_file_text(self):
         with open('templates/config.yml.mustache', 'r') as f:
