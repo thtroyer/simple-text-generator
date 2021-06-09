@@ -12,7 +12,6 @@ class TrainingStatus:
 
 
 class Train:
-    # todo add model export
     # todo capture texgenrnn output (loss, etc) for logging
     # todo run until options (iterations? loss? time?)
 

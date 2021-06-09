@@ -15,14 +15,9 @@ def draw_edit_existing_job_window():
 
 class EditJobWindow:
     def __init__(self):
-        self.main_window = None
-        self.new_job_window = None
-        self.new_batch_job_window = None
         self.edit_job_window = None
-        self.new_job_load_model_window = None
-        # fields in new_job_window
+
         self.number_of_iterations = None
-        self.project_name = None
         self.project_name_edit_text = None
         self.dropout = None
         self.temperatures_to_generate = None
@@ -32,12 +27,9 @@ class EditJobWindow:
         self.save_frequency = None
         self.items_to_generate_at_end = None
         self.button_open_training_file = None
-        self.button_open_model_file = None
         self.training_file = None
-        self.batch_training_files = None
         self.training_file_origin_path = None
         self.model_to_load = None
-        self.model_to_load_origin_path = None
 
     def edit_existing_job_select_updated(self, selected_value):
         self.project_name_edit_text = selected_value

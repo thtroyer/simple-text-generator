@@ -1,15 +1,5 @@
-import os
-import pathlib
-from shutil import copyfile
-from tkinter import filedialog
 import tkinter as tk
-import chevron
-from pathlib import Path
-from tkinter.messagebox import showwarning
-import subprocess
 
-from simpletextgenerator.models.config import Config
-from simpletextgenerator.training import TrainingStatus
 from simpletextgenerator.ui import new_job, edit_job
 
 class MenuWindow:

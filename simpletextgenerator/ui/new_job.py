@@ -28,15 +28,12 @@ def draw_new_batch_job_window():
 class NewJobWindow:
 
     def __init__(self):
-        self.main_window = None
         self.new_job_window = None
         self.new_batch_job_window = None
-        self.edit_job_window = None
         self.new_job_load_model_window = None
-        # fields in new_job_window
+
         self.number_of_iterations = None
         self.project_name = None
-        self.project_name_edit_text = None
         self.dropout = None
         self.temperatures_to_generate = None
         self.items_to_generate_between_generations = None
