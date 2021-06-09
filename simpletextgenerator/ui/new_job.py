@@ -11,27 +11,18 @@ from simpletextgenerator.training import TrainingStatus
 
 
 def draw_new_job_window():
-    """
-    Used by tkinter to initialize the new job windows
-    """
     new_job_window = NewJobWindow()
     new_job_window.draw_new_job_window()
 
 
 def draw_new_job_load_model_window():
-    """
-    Used by tkinter to initialize the new job windows
-    """
     new_job_window = NewJobWindow()
     new_job_window.draw_new_job_load_model_window()
 
 
 def draw_new_batch_job_window():
-    """
-    Used by tkinter to initialize the new job windows
-    """
     new_batch_job_window = NewJobWindow()
-    new_batch_job_window.draw_new_ba()
+    new_batch_job_window.draw_new_batch_job_window()
 
 
 class NewJobWindow:
@@ -393,4 +384,10 @@ class NewJobWindow:
         top_frame.grid(row=0, column=0)
         model_frame.grid(row=1, column=0)
         bottom_frame.grid(row=3, column=0)
+
+    def set_training_file_batch(self):
+        # root = tk.Tk()
+        self.batch_training_files = tk.filedialog.askopenfilenames(title='Choose a file')
+
+        # self.button_open_model_file['text'] = self.model_to_load
 
