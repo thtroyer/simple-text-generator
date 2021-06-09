@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - (in progress)
 ### Changed
 - UI cleanup
+- Switched to pipenv
 
 ## [0.2.0] - 20201-05-09
 ### Added
