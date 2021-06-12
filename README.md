@@ -6,15 +6,16 @@ Built in python, using the textgenrrn library (tensorflow).
 ## Usage
 Tested on Ubuntu 18.04 with Python 3.8.10 and Windows 10 with Python 3.7.7.
 
-Newest Python versions aren't always supported by Tensorflow.  Try downgrading to known working versions if you have issues.
 
 ## Set up environment
 
 The following instructions are examples; adapt them for your needs.
 
-Instructions require pipenv to be installed.  See https://pypi.org/project/pipenv/
+Requires:
 
-Note: Project uses CPU-based training by default.  Additional dependencies (Tensorflow compatible CUDA libraries) are required to use GPU training.
+ - <= Python 3.8 (not sure earliest version) due to Tensorflow incompatibilities with Python 3.9+ right now.
+ - pipenv  See https://pypi.org/project/pipenv/
+ - Optional Tensorflow CUDA libraries for GPU training.  CPU training is used otherwise.
 
 ### Linux:
 (Mac and Windows should be very similar with pipenv)
