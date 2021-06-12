@@ -1,7 +1,7 @@
 import sys
 from time import sleep
 
-time_between_prints = 0.5
+time_between_prints = 0.05
 
 if __name__ == "__main__":
     pass

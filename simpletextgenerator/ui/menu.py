@@ -2,13 +2,13 @@ import subprocess
 import tkinter as tk
 from warnings import showwarning
 
-from simpletextgenerator.ui import new_job, edit_job
+from simpletextgenerator.ui import new_job, edit_job, training
 
 class MenuWindow:
     def draw_main_window(self):
         main_window = tk.Tk()
         main_window.title('simple-text-generator')
-        main_window.geometry("300x180")
+        main_window.geometry("300x220")
         main_frame = tk.Frame(main_window)
         main_frame.pack()
         tk.Button(
@@ -57,8 +57,8 @@ class MenuWindow:
 
         tk.Button(
             main_frame,
-            text='Run jobs (Linux only, experimental)',
-            command=self.run_training,
+            text='Run jobs (experimental)',
+            command=training.create_training_window,
             width=35
         ).pack()
 
