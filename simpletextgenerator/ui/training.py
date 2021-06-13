@@ -11,19 +11,25 @@ from tkinter.scrolledtext import ScrolledText
 
 def create_training_window():
     TrainingRunner().begin_work()
+    # subprocess_protocol = SubprocessProtocol()
+    # subprocess_protocol.run_training()
 
 
 class TrainingRunner:
     def __init__(self):
-        self.training_window = TrainingWindow()
-        self.training_window.draw_training_window()
+        pass
+        # self.training_window = TrainingWindow()
+        # self.training_window.draw_training_window()
 
-    def fire_training(self):
+    def fire_training(self, loop):
+        asyncio.set_event_loop(loop)
         subprocess_protocol = SubprocessProtocol()
-        subprocess_protocol.run_training(self.training_window)
+        # subprocess_protocol.run_training(self.training_window)
+        subprocess_protocol.run_training()
 
     def begin_work(self):
-        threading.Thread(target=self.fire_training, daemon=True).start()
+        loop = asyncio.new_event_loop()
+        threading.Thread(target=self.fire_training, daemon=True, args=[loop]).start()
 
 
 class TrainingWindow:
@@ -129,7 +135,9 @@ class SubprocessProtocol(asyncio.SubprocessProtocol):
         self._exited = True
         self.signal_exit()
 
-    def run_training(self, training_window):
+    def run_training(self):
+        training_window = TrainingWindow()
+        training_window.draw_training_window()
         SubprocessProtocol.training_window = training_window
         if os.name == 'nt':
             # On Windows, the ProactorEventLoop is necessary to listen on pipes
