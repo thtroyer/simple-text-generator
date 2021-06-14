@@ -41,7 +41,7 @@ class TrainingRunner:
 
 class TrainingWindow:
     def __init__(self, tk, stdout_queue, stderr_queue):
-        self.autoscroll = tkinter.IntVar()
+        self.is_autoscroll = True
         self.set_training_file = None
         self.save_training_window = None
         self.back_training_window = None
@@ -50,6 +50,9 @@ class TrainingWindow:
         self.tk = tk
         self.stdout_queue = stdout_queue
         self.stderr_queue = stderr_queue
+
+    def toggle_autoscroll(self):
+        self.is_autoscroll = not self.is_autoscroll
 
     def draw_training_window(self):
         if self.training_window is not None:
@@ -86,12 +89,14 @@ class TrainingWindow:
 
         text_area.grid(column=0, pady=20, padx=20)
 
-        tk.Label(text_frame, text="Autoscroll:").grid(row=1, column=0)
-        tk.Checkbutton(
+        tk.Label(text_frame, text="Autoscroll").grid(row=1, column=0)
+        checkbox = tk.Checkbutton(
             text_frame,
             text="Autoscroll:",
-            variable=self.autoscroll
-        ).grid(row=1, column=0)
+            command=self.toggle_autoscroll,
+        )
+        checkbox.grid(row=1, column=0)
+        checkbox.select()
 
         status_frame = tk.Frame(main_frame)
 
@@ -101,16 +106,15 @@ class TrainingWindow:
         self.periodic_callback()
 
     def add_text(self, text):
-        print("found " + text)
         self.text_area.insert(tk.INSERT, text)
         self.text_area.insert(tk.INSERT, "\n")
         self.text_area.update_idletasks()
         self.training_window.update_idletasks()
-        if self.autoscroll: # todo fix autoscroll
+        if self.is_autoscroll:
             self.text_area.see(tk.END)
 
     def process_text(self, text: str, type: str):
-        #todo filter and update various UI elements
+        # todo filter and update various UI elements
         self.add_text(f"{type}: {text}")
 
     def update_ui(self):
