@@ -2,6 +2,7 @@ import asyncio
 import contextlib
 import os
 import locale
+import re
 import threading
 import tkinter
 import tkinter as tk
@@ -81,12 +82,6 @@ class TrainingWindow:
         text_area.grid(row=0, column=0)
         self.text_area = text_area
 
-        self.add_text("bork")
-        self.add_text("bork2")
-        self.add_text("bork3")
-        # text_area.config(state='disabled')
-        text_area.see(tk.END)
-
         text_area.grid(column=0, pady=20, padx=20)
 
         tk.Label(text_frame, text="Autoscroll").grid(row=1, column=0)
@@ -113,9 +108,30 @@ class TrainingWindow:
         if self.is_autoscroll:
             self.text_area.see(tk.END)
 
+    def is_progress_text(self, text):
+        match = re.search(r"\d*\/\d*\ \[[\.=>]*\]", text)
+        if match is not None:
+            return True
+
+        match = re.search(r"\d*\.\d*s/it\]$", text)
+        if match is not None:
+            return True
+
+        return False
+
     def process_text(self, text: str, type: str):
         # todo filter and update various UI elements
-        self.add_text(f"{type}: {text}")
+
+        if self.is_progress_text(text):
+            return # todo progress bar
+
+        if type == "stderr":
+            return
+
+        if not text.strip():
+            return
+
+        self.add_text(text)
 
     def update_ui(self):
         while self.stdout_queue.qsize():
@@ -136,7 +152,7 @@ class TrainingWindow:
 
     def periodic_callback(self):
         self.update_ui()
-        self.training_window.after(2000, self.periodic_callback)
+        self.training_window.after(200, self.periodic_callback)
 
 
 class SubprocessProtocol(asyncio.SubprocessProtocol):
