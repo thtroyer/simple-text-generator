@@ -6,6 +6,7 @@ import re
 import threading
 import tkinter
 import tkinter as tk
+from tkinter import ttk
 from queue import Queue
 from tkinter.scrolledtext import ScrolledText
 
@@ -51,6 +52,10 @@ class TrainingWindow:
         self.tk = tk
         self.stdout_queue = stdout_queue
         self.stderr_queue = stderr_queue
+        self.sub_progress_label = None
+        self.sub_progress = None
+        self.project_progress_label = None
+        self.project_progress = None
 
     def toggle_autoscroll(self):
         self.is_autoscroll = not self.is_autoscroll
@@ -94,6 +99,16 @@ class TrainingWindow:
         checkbox.select()
 
         status_frame = tk.Frame(main_frame)
+        status_frame.grid()
+        self.sub_progress_label = tk.Label(status_frame, text="Progress")
+        self.sub_progress_label.grid(row=0, column=0)
+        self.sub_progress = ttk.Progressbar(status_frame, orient=tk.HORIZONTAL, length=100, mode='determinate')
+        self.sub_progress.grid(row=0, column=1)
+
+        self.project_progress_label = tk.Label(status_frame, text="Project progress")
+        self.sub_progress_label.grid(row=1, column=0)
+        self.project_progress = ttk.Progressbar(status_frame, orient=tk.HORIZONTAL, length=100, mode='determinate')
+        self.project_progress.grid(row=1, column=1)
 
         top_frame.grid(row=0, column=0)
         text_frame.grid(row=1, column=0)
@@ -109,21 +124,32 @@ class TrainingWindow:
             self.text_area.see(tk.END)
 
     def is_progress_text(self, text):
-        match = re.search(r"\d*\/\d*\ \[[\.=>]*\]", text)
-        if match is not None:
+        if self.is_progress_bar1(text):
             return True
-
-        match = re.search(r"\d*\.\d*s/it\]$", text)
-        if match is not None:
+        if self.is_progress_bar2(text):
             return True
-
         return False
+
+    def is_progress_bar1(self, text):
+        return (re.search(r"\d*\/\d*\ \[[\.=>]*\]", text)) is not None
+
+    def is_progress_bar2(self, text):
+        return (re.search(r"\d*\.\d*s/it\]$", text)) is not None
 
     def process_text(self, text: str, type: str):
         # todo filter and update various UI elements
+        percentage = 0
 
         if self.is_progress_text(text):
-            return # todo progress bar
+            if self.is_progress_bar1(text):
+                percentage = self.get_percentage_bar1(text)
+            else:
+                percentage = self.get_percentage_bar2(text)
+
+            self.sub_progress["maximum"] = 100
+            self.sub_progress["value"] = percentage
+            return
+
 
         if type == "stderr":
             return
@@ -153,6 +179,19 @@ class TrainingWindow:
     def periodic_callback(self):
         self.update_ui()
         self.training_window.after(200, self.periodic_callback)
+
+    def get_percentage_bar1(self, text) -> int:
+        regex = re.compile(r"[^\.=>]")
+        cleaned_string = regex.sub('', text)
+        arrow_position = cleaned_string.index(">")
+        return int(
+            (arrow_position / len(cleaned_string)) * 100
+        )
+
+
+    def get_percentage_bar2(self, text) -> int:
+        pieces = text.split("%")
+        return pieces[0]
 
 
 class SubprocessProtocol(asyncio.SubprocessProtocol):
