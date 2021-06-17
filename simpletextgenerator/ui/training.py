@@ -53,9 +53,12 @@ class TrainingWindow:
         self.stdout_queue = stdout_queue
         self.stderr_queue = stderr_queue
         self.sub_progress_label = None
+        self.sub_progress_eta = None
         self.sub_progress = None
         self.project_progress_label = None
         self.project_progress = None
+        self.total_projects = 0
+        self.projects_complete = 0
 
     def toggle_autoscroll(self):
         self.is_autoscroll = not self.is_autoscroll
@@ -67,13 +70,13 @@ class TrainingWindow:
         training_window = self.tk.Tk()
         self.training_window = training_window
         tk = self.tk
-        training_window.title("Create New Job - simple-text-generator")
+        training_window.title("Training model - simple-text-generator")
         main_frame = tk.Frame(training_window)
         main_frame.grid()
         top_frame = tk.Frame(main_frame)
-        tk.Label(top_frame, text="Project Name:").grid(row=0, column=0)
-        self.project_name = tk.Label(top_frame)
-        self.project_name.grid(row=0, column=1)
+        # tk.Label(top_frame, text="Project").grid(row=0, column=0)
+        self.project_name_label = tk.Label(top_frame)
+        self.project_name_label.grid(row=0, column=0)
 
         text_frame = tk.Frame(main_frame)
         text_area = ScrolledText(
@@ -102,12 +105,14 @@ class TrainingWindow:
         status_frame.grid()
         self.sub_progress_label = tk.Label(status_frame, text="Progress")
         self.sub_progress_label.grid(row=0, column=0)
-        self.sub_progress = ttk.Progressbar(status_frame, orient=tk.HORIZONTAL, length=100, mode='determinate')
+        self.sub_progress = ttk.Progressbar(status_frame, orient=tk.HORIZONTAL, maximum=100, length=300, mode='determinate')
         self.sub_progress.grid(row=0, column=1)
+        self.sub_progress_eta = tk.Label(status_frame, text="ETA/Desc")
+        self.sub_progress_eta.grid(row=0, column=2)
 
         self.project_progress_label = tk.Label(status_frame, text="Project progress")
-        self.sub_progress_label.grid(row=1, column=0)
-        self.project_progress = ttk.Progressbar(status_frame, orient=tk.HORIZONTAL, length=100, mode='determinate')
+        self.project_progress_label .grid(row=1, column=0)
+        self.project_progress = ttk.Progressbar(status_frame, orient=tk.HORIZONTAL, maximum=100, length=300, mode='determinate')
         self.project_progress.grid(row=1, column=1)
 
         top_frame.grid(row=0, column=0)
@@ -136,20 +141,30 @@ class TrainingWindow:
     def is_progress_bar2(self, text):
         return (re.search(r"\d*\.\d*s/it\]$", text)) is not None
 
-    def process_text(self, text: str, type: str):
-        # todo filter and update various UI elements
-        percentage = 0
+    def get_progress_text_bar1(self, text):
+        pieces = text.split("\n")
+        return pieces[0]
 
+    def get_progress_text_bar2(self, text):
+        pieces = text.split("|")
+        return pieces[2]
+
+    def process_text(self, text: str, type: str):
         if self.is_progress_text(text):
             if self.is_progress_bar1(text):
                 percentage = self.get_percentage_bar1(text)
+                eta_text = self.get_progress_text_bar1(text)
             else:
                 percentage = self.get_percentage_bar2(text)
+                eta_text = self.get_progress_text_bar2(text)
 
             self.sub_progress["maximum"] = 100
             self.sub_progress["value"] = percentage
+            self.sub_progress_eta.config(text=eta_text)
+            # todo update project progress -- needs more output from training process
             return
 
+        #todo update UI with project progress (e.g. "project 1 of 3")
 
         if type == "stderr":
             return
@@ -187,7 +202,6 @@ class TrainingWindow:
         return int(
             (arrow_position / len(cleaned_string)) * 100
         )
-
 
     def get_percentage_bar2(self, text) -> int:
         pieces = text.split("%")
