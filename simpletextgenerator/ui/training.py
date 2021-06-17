@@ -95,7 +95,7 @@ class TrainingWindow:
         tk.Label(text_frame, text="Autoscroll").grid(row=1, column=0)
         checkbox = tk.Checkbutton(
             text_frame,
-            text="Autoscroll:",
+            text="Autoscroll",
             command=self.toggle_autoscroll,
         )
         checkbox.grid(row=1, column=0)
@@ -149,6 +149,13 @@ class TrainingWindow:
         pieces = text.split("|")
         return pieces[2]
 
+    def is_found_projects_statement(self, text):
+        return (re.search(r"Found \d* projects to train\.", text)) is not None
+
+    def is_saving_final_model(self, text):
+        return (re.search(r"Saving final model", text)) is not None
+
+
     def process_text(self, text: str, type: str):
         if self.is_progress_text(text):
             if self.is_progress_bar1(text):
@@ -170,6 +177,17 @@ class TrainingWindow:
             return
 
         if not text.strip():
+            return
+
+        if self.is_found_projects_statement(text):
+            pieces = text.split(" ")
+            self.total_projects = int(pieces[1])
+            self.update_project_label()
+            return
+
+        if self.is_saving_final_model(text):
+            self.projects_complete += 1
+            self.update_project_label()
             return
 
         self.add_text(text)
@@ -206,6 +224,10 @@ class TrainingWindow:
     def get_percentage_bar2(self, text) -> int:
         pieces = text.split("%")
         return pieces[0]
+
+    def update_project_label(self):
+        current_project = self.projects_complete + 1
+        self.project_name_label.config(text=f"Running {current_project} of {self.total_projects}")
 
 
 class SubprocessProtocol(asyncio.SubprocessProtocol):
@@ -266,6 +288,7 @@ class SubprocessProtocol(asyncio.SubprocessProtocol):
 
         with contextlib.closing(self.loop):
             transport = self.loop.run_until_complete(self.loop.subprocess_exec(
-                SubprocessProtocol, 'python', 'simpletextgenerator/mock/mock_run_training.py'))[0]
+                SubprocessProtocol, 'python', 'run_training.py'))[0]
+                # SubprocessProtocol, 'python', 'simpletextgenerator/mock/mock_run_training.py'))[0]
 
             self.loop.run_forever()
