@@ -1,4 +1,5 @@
 import asyncio
+import collections
 import contextlib
 import os
 import locale
@@ -15,6 +16,26 @@ def create_training_window():
     TrainingRunner().begin_work()
     # subprocess_protocol = SubprocessProtocol(tk)
     # subprocess_protocol.run_training()
+
+
+class RunningMean:
+    def __init__(self, max_number_of_elements=100):
+        self.max_number_of_elements = max_number_of_elements
+        self.number_of_elements = 0
+        self.elements = collections.deque(maxlen=max_number_of_elements)
+
+    def add(self, number):
+        self.elements.append(number)
+
+    def mean(self):
+        total = 0
+        num_elements = 0
+        for i in self.elements:
+            total += i
+            num_elements += 1
+
+        return round(total / num_elements, 3)
+
 
 
 class TrainingRunner:
@@ -59,6 +80,8 @@ class TrainingWindow:
         self.project_progress = None
         self.total_projects = 0
         self.projects_complete = 0
+        self.running_mean_loss = RunningMean(10)
+        self.running_mean_generation = RunningMean(100)
 
     def toggle_autoscroll(self):
         self.is_autoscroll = not self.is_autoscroll
@@ -108,12 +131,22 @@ class TrainingWindow:
         self.sub_progress = ttk.Progressbar(status_frame, orient=tk.HORIZONTAL, maximum=100, length=300, mode='determinate')
         self.sub_progress.grid(row=0, column=1)
         self.sub_progress_eta = tk.Label(status_frame, text="ETA/Desc")
-        self.sub_progress_eta.grid(row=0, column=2)
+        self.sub_progress_eta.grid(row=1, column=1)
+
+        self.loss_label = tk.Label(status_frame, text="Current loss: ")
+        self.loss_label .grid(row=2, column=0)
+        self.loss_value_label = tk.Label(status_frame, text="")
+        self.loss_value_label .grid(row=2, column=1)
+
+        self.generation_label = tk.Label(status_frame, text="Text generation speed: ")
+        self.generation_label .grid(row=2, column=2)
+        self.generation_value_label = tk.Label(status_frame, text="")
+        self.generation_value_label .grid(row=2, column=3)
 
         self.project_progress_label = tk.Label(status_frame, text="Project progress")
-        self.project_progress_label .grid(row=1, column=0)
+        self.project_progress_label .grid(row=3, column=0)
         self.project_progress = ttk.Progressbar(status_frame, orient=tk.HORIZONTAL, maximum=100, length=300, mode='determinate')
-        self.project_progress.grid(row=1, column=1)
+        self.project_progress.grid(row=3, column=1)
 
         top_frame.grid(row=0, column=0)
         text_frame.grid(row=1, column=0)
@@ -161,9 +194,25 @@ class TrainingWindow:
             if self.is_progress_bar1(text):
                 percentage = self.get_percentage_bar1(text)
                 eta_text = self.get_progress_text_bar1(text)
+                loss_value = eta_text.split("loss: ")[-1]
+                if loss_value != '':
+                    self.running_mean_loss.add(float(loss_value))
+                self.loss_value_label.config(text=self.running_mean_loss.mean())
             else:
                 percentage = self.get_percentage_bar2(text)
                 eta_text = self.get_progress_text_bar2(text)
+                generation_text = eta_text.split(",  ")[-1].split("]")[0]
+                if generation_text != '':
+                    generation_value = float(generation_text[:-4])
+                    if generation_text[-4:] == "s/it":
+                        generation_value = 1 / generation_value
+                    self.running_mean_generation.add(generation_value)
+                items_per_second = self.running_mean_generation.mean()
+                if items_per_second < 1:
+                    seconds_per_item = round(1 / items_per_second, 3)
+                    self.generation_value_label.config(text=str(seconds_per_item) + " sec/item")
+                else:
+                    self.generation_value_label.config(text=str(round(items_per_second,3)) + " items/sec")
 
             self.sub_progress["maximum"] = 100
             self.sub_progress["value"] = percentage
