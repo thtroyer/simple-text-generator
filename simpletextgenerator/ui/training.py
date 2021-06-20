@@ -37,7 +37,6 @@ class RunningMean:
         return round(total / num_elements, 3)
 
 
-
 class TrainingRunner:
     def __init__(self):
         self.tk = tkinter
@@ -134,17 +133,17 @@ class TrainingWindow:
         self.sub_progress_eta.grid(row=1, column=1)
 
         self.loss_label = tk.Label(status_frame, text="Current loss: ")
-        self.loss_label .grid(row=2, column=0)
+        self.loss_label.grid(row=2, column=0)
         self.loss_value_label = tk.Label(status_frame, text="")
-        self.loss_value_label .grid(row=2, column=1)
+        self.loss_value_label.grid(row=2, column=1)
 
         self.generation_label = tk.Label(status_frame, text="Text generation speed: ")
-        self.generation_label .grid(row=2, column=2)
+        self.generation_label.grid(row=2, column=2)
         self.generation_value_label = tk.Label(status_frame, text="")
-        self.generation_value_label .grid(row=2, column=3)
+        self.generation_value_label.grid(row=2, column=3)
 
         self.project_progress_label = tk.Label(status_frame, text="Project progress")
-        self.project_progress_label .grid(row=3, column=0)
+        self.project_progress_label.grid(row=3, column=0)
         self.project_progress = ttk.Progressbar(status_frame, orient=tk.HORIZONTAL, maximum=100, length=300, mode='determinate')
         self.project_progress.grid(row=3, column=1)
 
@@ -154,6 +153,7 @@ class TrainingWindow:
         self.periodic_callback()
 
     def add_text(self, text):
+        text = text.encode("ascii", "ignore").decode()
         self.text_area.insert(tk.INSERT, text)
         self.text_area.insert(tk.INSERT, "\n")
         self.text_area.update_idletasks()
@@ -172,7 +172,9 @@ class TrainingWindow:
         return (re.search(r"\d*\/\d*\ \[[\.=>]*\]", text)) is not None
 
     def is_progress_bar2(self, text):
-        return (re.search(r"\d*\.\d*s/it\]$", text)) is not None
+        match1 = (re.search(r"\d*\.\d*s/it\]$", text)) is not None
+        match2 = (re.search(r"\d*\.\d*it/s\]$", text)) is not None
+        return match1 or match2
 
     def get_progress_text_bar1(self, text):
         pieces = text.split("\n")
@@ -187,7 +189,6 @@ class TrainingWindow:
 
     def is_saving_final_model(self, text):
         return (re.search(r"Saving final model", text)) is not None
-
 
     def process_text(self, text: str, type: str):
         if self.is_progress_text(text):
@@ -212,7 +213,7 @@ class TrainingWindow:
                     seconds_per_item = round(1 / items_per_second, 3)
                     self.generation_value_label.config(text=str(seconds_per_item) + " sec/item")
                 else:
-                    self.generation_value_label.config(text=str(round(items_per_second,3)) + " items/sec")
+                    self.generation_value_label.config(text=str(round(items_per_second, 3)) + " items/sec")
 
             self.sub_progress["maximum"] = 100
             self.sub_progress["value"] = percentage
@@ -220,10 +221,14 @@ class TrainingWindow:
             # todo update project progress -- needs more output from training process
             return
 
-        #todo update UI with project progress (e.g. "project 1 of 3")
+        # todo update UI with project progress (e.g. "project 1 of 3")
 
         if type == "stderr":
             return
+
+        # cleaning up some garbage characters
+        text = str.replace(text, '\b', '')
+        text = str.replace(text, '\r', '')
 
         if not text.strip():
             return
