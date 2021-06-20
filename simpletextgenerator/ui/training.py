@@ -182,6 +182,8 @@ class TrainingWindow:
         if self.is_found_projects_statement(text):
             pieces = text.split(" ")
             self.total_projects = int(pieces[1])
+            if self.total_projects == 0:
+                self.add_text("Found 0 projects to run.  Nothing to do.")
             self.update_project_label()
             return
 
@@ -257,7 +259,8 @@ class SubprocessProtocol(asyncio.SubprocessProtocol):
     def signal_exit(self):
         if not self.finished:
             return
-        self.loop.stop()
+        if self.loop:
+            self.loop.stop()
 
     def pipe_data_received(self, fd, data):
         text = data.decode(locale.getpreferredencoding(False))
@@ -286,9 +289,12 @@ class SubprocessProtocol(asyncio.SubprocessProtocol):
         else:
             self.loop = asyncio.get_event_loop()
 
+        run_with_mock_data = os.environ.get('MOCK_UI_DATA')
         with contextlib.closing(self.loop):
-            transport = self.loop.run_until_complete(self.loop.subprocess_exec(
-                SubprocessProtocol, 'python', 'run_training.py'))[0]
-                # SubprocessProtocol, 'python', 'simpletextgenerator/mock/mock_run_training.py'))[0]
+            process = 'run_training.py'
+            if run_with_mock_data is not None and run_with_mock_data:
+                process = 'simpletextgenerator/mock/mock_run_training.py'
+
+            transport = self.loop.run_until_complete(self.loop.subprocess_exec(SubprocessProtocol, 'python', process))[0]
 
             self.loop.run_forever()
