@@ -171,8 +171,6 @@ class TrainingWindow:
             # todo update project progress -- needs more output from training process
             return
 
-        #todo update UI with project progress (e.g. "project 1 of 3")
-
         if type == "stderr":
             return
 
@@ -228,6 +226,9 @@ class TrainingWindow:
     def update_project_label(self):
         current_project = self.projects_complete + 1
         self.project_name_label.config(text=f"Running {current_project} of {self.total_projects}")
+
+        if (current_project > self.total_projects):
+            self.project_name_label.config(text=f"Training and generation complete.")
 
 
 class SubprocessProtocol(asyncio.SubprocessProtocol):
