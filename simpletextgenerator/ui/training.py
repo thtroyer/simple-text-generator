@@ -4,6 +4,7 @@ import contextlib
 import os
 import locale
 import re
+import sys
 import threading
 import tkinter
 import tkinter as tk
@@ -12,10 +13,10 @@ from queue import Queue
 from tkinter.scrolledtext import ScrolledText
 
 
+# todo clean up this file
+
 def create_training_window():
     TrainingRunner().begin_work()
-    # subprocess_protocol = SubprocessProtocol(tk)
-    # subprocess_protocol.run_training()
 
 
 class RunningMean:
@@ -40,14 +41,11 @@ class RunningMean:
 class TrainingRunner:
     def __init__(self):
         self.tk = tkinter
-        # self.training_window = TrainingWindow(tk)
-        # self.training_window.draw_training_window()
 
     def fire_training(self, loop, training_window, stdout_queue, stderr_queue):
         asyncio.set_event_loop(loop)
 
         subprocess_protocol = SubprocessProtocol(self.tk, training_window, stdout_queue, stderr_queue)
-        # subprocess_protocol.run_training(self.training_window)
         subprocess_protocol.run_training()
 
     def begin_work(self):
@@ -77,6 +75,11 @@ class TrainingWindow:
         self.sub_progress = None
         self.project_progress_label = None
         self.project_progress = None
+        self.loss_label = None
+        self.loss_value_label = None
+        self.generation_label = None
+        self.generation_value_label = None
+
         self.total_projects = 0
         self.projects_complete = 0
         self.running_mean_loss = RunningMean(10)
@@ -96,7 +99,6 @@ class TrainingWindow:
         main_frame = tk.Frame(training_window)
         main_frame.grid()
         top_frame = tk.Frame(main_frame)
-        # tk.Label(top_frame, text="Project").grid(row=0, column=0)
         self.project_name_label = tk.Label(top_frame)
         self.project_name_label.grid(row=0, column=0)
 
@@ -142,10 +144,13 @@ class TrainingWindow:
         self.generation_value_label = tk.Label(status_frame, text="")
         self.generation_value_label.grid(row=2, column=3)
 
-        self.project_progress_label = tk.Label(status_frame, text="Project progress")
+        # todo
+        # self.project_progress_label = tk.Label(status_frame, text="Project progress")
+        # self.project_progress_label.grid(row=3, column=0)
+        # self.project_progress = ttk.Progressbar(status_frame, orient=tk.HORIZONTAL, maximum=100, length=300, mode='determinate')
+        # self.project_progress.grid(row=3, column=1)
+        self.project_progress_label = tk.Label(status_frame, text="This UI is a work in progress and not representative of final design.")
         self.project_progress_label.grid(row=3, column=0)
-        self.project_progress = ttk.Progressbar(status_frame, orient=tk.HORIZONTAL, maximum=100, length=300, mode='determinate')
-        self.project_progress.grid(row=3, column=1)
 
         top_frame.grid(row=0, column=0)
         text_frame.grid(row=1, column=0)
@@ -178,7 +183,9 @@ class TrainingWindow:
 
     def get_progress_text_bar1(self, text):
         pieces = text.split("\n")
-        return pieces[0]
+        if pieces[0].find("[") == -1:
+            return pieces[0]
+        return pieces[0].split("-")[1]
 
     def get_progress_text_bar2(self, text):
         pieces = text.split("|")
@@ -191,14 +198,20 @@ class TrainingWindow:
         return (re.search(r"Saving final model", text)) is not None
 
     def process_text(self, text: str, type: str):
+        if type == "stderr":
+            print(text, file=sys.stderr)
+        else:
+            print(text, file=sys.stdout)
+
         if self.is_progress_text(text):
             if self.is_progress_bar1(text):
                 percentage = self.get_percentage_bar1(text)
                 eta_text = self.get_progress_text_bar1(text)
-                loss_value = eta_text.split("loss: ")[-1]
+                loss_value = text.split("loss: ")[-1]
                 if loss_value != '':
                     self.running_mean_loss.add(float(loss_value))
-                self.loss_value_label.config(text=self.running_mean_loss.mean())
+                self.loss_value_label.config(text=str(self.running_mean_loss.mean()))
+                self.sub_progress_eta.config(text="Training model. " + eta_text)
             else:
                 percentage = self.get_percentage_bar2(text)
                 eta_text = self.get_progress_text_bar2(text)
@@ -214,14 +227,11 @@ class TrainingWindow:
                     self.generation_value_label.config(text=str(seconds_per_item) + " sec/item")
                 else:
                     self.generation_value_label.config(text=str(round(items_per_second, 3)) + " items/sec")
+                self.sub_progress_eta.config(text="Generating text. " + eta_text)
 
             self.sub_progress["maximum"] = 100
             self.sub_progress["value"] = percentage
-            self.sub_progress_eta.config(text=eta_text)
-            # todo update project progress -- needs more output from training process
             return
-
-        # todo update UI with project progress (e.g. "project 1 of 3")
 
         if type == "stderr":
             return
@@ -231,6 +241,9 @@ class TrainingWindow:
         text = str.replace(text, '\r', '')
 
         if not text.strip():
+            return
+
+        if self.is_stray_ETA(text):
             return
 
         if self.is_found_projects_statement(text):
@@ -253,7 +266,6 @@ class TrainingWindow:
             try:
                 msg = self.stdout_queue.get(0)
                 self.process_text(msg, "stdout")
-            # except Queue.Empty:
             except Exception as e:
                 print(e)
 
@@ -261,7 +273,6 @@ class TrainingWindow:
             try:
                 msg = self.stderr_queue.get(0)
                 self.process_text(msg, "stderr")
-            # except Queue.Empty:
             except Exception as e:
                 print(e)
 
@@ -272,7 +283,11 @@ class TrainingWindow:
     def get_percentage_bar1(self, text) -> int:
         regex = re.compile(r"[^\.=>]")
         cleaned_string = regex.sub('', text)
-        arrow_position = cleaned_string.index(">")
+        try:
+            arrow_position = cleaned_string.index(">")
+        except ValueError:
+            return 0
+
         return int(
             (arrow_position / len(cleaned_string)) * 100
         )
@@ -284,6 +299,11 @@ class TrainingWindow:
     def update_project_label(self):
         current_project = self.projects_complete + 1
         self.project_name_label.config(text=f"Running {current_project} of {self.total_projects}")
+
+    def is_stray_ETA(self, text):
+        match1 = (re.search(r"^-\sETA:", text)) is not None
+        match2 = (re.search(r"loss:\s\d*\.\d*$", text)) is not None
+        return match1 and match2
 
 
 class SubprocessProtocol(asyncio.SubprocessProtocol):
