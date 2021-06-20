@@ -3,6 +3,8 @@ Simple Text Generator is a project to make it easy to train RNN on a set of text
 
 Built in python, using the textgenrrn library (tensorflow).
 
+See the [milestones](https://github.com/thtroyer/simple-text-generator/milestones) page for work-in-progress and planned features.
+
 ## Usage
 Tested on Ubuntu 18.04 with Python 3.8.10 and Windows 10 with Python 3.7.7.
 
