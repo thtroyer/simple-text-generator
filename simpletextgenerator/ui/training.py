@@ -184,10 +184,13 @@ class TrainingWindow:
         return match1 or match2
 
     def get_progress_text_bar1(self, text):
-        pieces = text.split("\n")
-        if pieces[0].find("[") == -1:
-            return pieces[0]
-        return pieces[0].split("-")[1]
+        try:
+            pieces = text.split("\n")
+            if pieces[0].find("[") == -1:
+                return pieces[0]
+            return pieces[0].split("-")[1]
+        except:
+            return ""
 
     def get_progress_text_bar2(self, text):
         pieces = text.split("|")
@@ -200,6 +203,10 @@ class TrainingWindow:
         return (re.search(r"Saving final model", text)) is not None
 
     def process_text(self, text: str, type: str):
+        # cleaning up some garbage characters
+        text = str.replace(text, '\b', '')
+        # text = str.replace(text, '\r', '')
+
         if type == "stderr":
             print(text, file=sys.stderr)
         else:
@@ -210,8 +217,11 @@ class TrainingWindow:
                 percentage = self.get_percentage_bar1(text)
                 eta_text = self.get_progress_text_bar1(text)
                 loss_value = text.split("loss: ")[-1]
-                if loss_value != '':
-                    self.running_mean_loss.add(float(loss_value))
+                try:
+                    if loss_value != '':
+                        self.running_mean_loss.add(float(loss_value))
+                except:
+                    print("loss parse: " + text)
                 self.loss_value_label.config(text=str(self.running_mean_loss.mean()))
                 self.sub_progress_eta.config(text="Training model. " + eta_text)
             else:
@@ -234,18 +244,22 @@ class TrainingWindow:
             self.sub_progress["maximum"] = 100
             self.sub_progress["value"] = percentage
             return
+        elif self.is_stray_ETA(text):
+            # sometimes ETA is on its own line, sometimes it is bundled with progressbar
+            loss_value = text.split("loss: ")[-1]
+            try:
+                if loss_value != '':
+                    self.running_mean_loss.add(float(loss_value))
+            except:
+                print("loss parse: " + text)
+            self.loss_value_label.config(text=str(self.running_mean_loss.mean()))
+            self.sub_progress_eta.config(text="Training model. " + text.split("loss: ")[0])
+            return
 
         if type == "stderr":
             return
 
-        # cleaning up some garbage characters
-        text = str.replace(text, '\b', '')
-        text = str.replace(text, '\r', '')
-
         if not text.strip():
-            return
-
-        if self.is_stray_ETA(text):
             return
 
         if self.is_found_projects_statement(text):
