@@ -1,3 +1,5 @@
+from time import sleep
+
 import yaml
 import os
 import shutil
@@ -30,6 +32,8 @@ def create_jobs(dirs) -> list:
             new_jobs.append(new_job)
         except RuntimeError:
             continue
+        except FileNotFoundError:
+            continue
     return new_jobs
 
 
@@ -38,7 +42,9 @@ def create_job(project) -> job.Job:
     project_name = os.path.basename(project)
     config_data, state_data = None, None
 
-    if project == "./projects/archive":
+    if project.split("/")[-1] == "archive":
+        raise RuntimeError("skip archive")
+    if project.split("\\")[-1] == "archive":
         raise RuntimeError("skip archive")
 
     try:
@@ -80,6 +86,7 @@ if __name__ == "__main__":
         print('------------------------------------')
         print("No projects found for training.  Ctrl+c to exit terminal.")
         exit(0)
+        input()
 
     sort_jobs(jobs_to_run)
     train(jobs_to_run)
