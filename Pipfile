@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-tensorflow = "==2.4.1" # unable to resolve keras at 2.5.0 currently
+tensorflow = "==2.4.2" # unable to resolve keras at 2.5.0 currently
 textgenrnn = {ref = "master", git = "git://github.com/minimaxir/textgenrnn"}
 chevron = "*"
 PyYAML = "*"
