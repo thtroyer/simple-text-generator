@@ -2,7 +2,8 @@ import subprocess
 import tkinter as tk
 from warnings import showwarning
 
-from simpletextgenerator.ui import new_job, edit_job, training
+from simpletextgenerator.ui import new_job, edit_job, training, archive_delete
+
 
 class MenuWindow:
     def draw_main_window(self):
@@ -41,17 +42,8 @@ class MenuWindow:
 
         tk.Button(
             main_frame,
-            text='Archive job',
-            command=quit,
-            state=tk.DISABLED,
-            width=35
-        ).pack()
-
-        tk.Button(
-            main_frame,
-            text='Delete job',
-            command=quit,
-            state=tk.DISABLED,
+            text='Archive, delete job',
+            command=archive_delete.draw_archive_delete_window,
             width=35
         ).pack()
 
