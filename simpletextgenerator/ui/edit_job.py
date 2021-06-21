@@ -15,6 +15,7 @@ def draw_edit_existing_job_window():
 
 class EditJobWindow:
     def __init__(self):
+        self.selected_project_name.set("default")
         self.edit_job_window = None
 
         self.number_of_iterations = None
@@ -30,6 +31,8 @@ class EditJobWindow:
         self.training_file = None
         self.training_file_origin_path = None
         self.model_to_load = None
+        self.selected_project_name = None
+        self.project_name_select = None
 
     def edit_existing_job_select_updated(self, selected_value):
         self.project_name_edit_text = selected_value
@@ -61,6 +64,7 @@ class EditJobWindow:
             self.edit_job_window = None
 
         edit_job_window = tk.Tk()
+        self.selected_project_name = tk.StringVar(edit_job_window)
         edit_job_window.title("Edit existing job - simple-text-generator")
         main_frame = tk.Frame(edit_job_window)
         main_frame.grid()
@@ -68,8 +72,7 @@ class EditJobWindow:
         tk.Label(top_frame, text="Project Name:").grid(row=0, column=0)
         bottom_frame = tk.Frame(main_frame)
         option_list = self.get_projects_from_disk()
-        self.selected_project_name = tk.StringVar()
-        self.selected_project_name.set(option_list[0])
+        self.selected_project_name.set("Select a project")
         self.project_name_select = tk.OptionMenu(
             top_frame,
             self.selected_project_name,
@@ -77,7 +80,7 @@ class EditJobWindow:
             command=self.edit_existing_job_select_updated
         )
 
-        self.project_name_select.config(width=10)
+        self.project_name_select.config(width=30)
         self.project_name_select.grid(row=0, column=1)
 
         tk.Button(bottom_frame, text='Cancel', command=self.destroy_window()).grid(row=0, column=0)
