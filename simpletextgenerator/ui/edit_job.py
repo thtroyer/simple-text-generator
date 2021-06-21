@@ -30,6 +30,8 @@ class EditJobWindow:
         self.training_file = None
         self.training_file_origin_path = None
         self.model_to_load = None
+        self.selected_project_name = None
+        self.project_name_select = None
 
     def edit_existing_job_select_updated(self, selected_value):
         self.project_name_edit_text = selected_value
