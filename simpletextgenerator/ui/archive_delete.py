@@ -1,12 +1,6 @@
 import os
 import shutil
-from tkinter import filedialog
 import tkinter as tk
-import chevron
-from pathlib import Path
-import run_training
-from simpletextgenerator.models.config import Config
-from simpletextgenerator.training import TrainingStatus
 
 
 def draw_archive_delete_window():

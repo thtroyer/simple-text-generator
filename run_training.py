@@ -1,11 +1,13 @@
-from time import sleep
-
 import yaml
 import os
 import shutil
+import sys
 
 from simpletextgenerator import training
 from simpletextgenerator.models import job
+
+# the following unused import is needed for pyinstaller to build correctly
+import sklearn.utils._weight_vector
 
 project_dir = "./projects"
 to_run_dir = "to_run"
@@ -85,8 +87,7 @@ if __name__ == "__main__":
         print('')
         print('------------------------------------')
         print("No projects found for training.  Ctrl+c to exit terminal.")
-        exit(0)
-        input()
+        sys.exit(0)
 
     sort_jobs(jobs_to_run)
     train(jobs_to_run)
@@ -95,4 +96,3 @@ if __name__ == "__main__":
     print('------------------------------------')
     print("All done.  Ctrl+c to exit terminal.")
     input()
-

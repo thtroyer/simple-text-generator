@@ -7,7 +7,7 @@ from os.path import splitext
 from tkinter import messagebox
 from shutil import copyfile
 from simpletextgenerator.models.config import Config
-from simpletextgenerator.training import TrainingStatus
+from simpletextgenerator.training_status import TrainingStatus
 
 
 def draw_new_job_window():

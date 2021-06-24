@@ -2,13 +2,7 @@ import os
 
 from textgenrnn import textgenrnn
 from simpletextgenerator.models.job import Job
-
-
-class TrainingStatus:
-    NEW = "NEW"
-    NEW_LOAD_MODEL = "NEW_LOAD_MODEL"
-    STARTED = "STARTED"
-    FINISHED = "FINISHED"
+from simpletextgenerator.training_status import TrainingStatus
 
 
 class Train:

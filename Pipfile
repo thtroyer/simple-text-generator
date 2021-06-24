@@ -13,6 +13,7 @@ PyYAML = "*"
 pipfile = "*"
 
 [dev-packages]
+pyinstaller = "*"
 
 [requires]
 python_version = "3.8"

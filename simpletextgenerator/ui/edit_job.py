@@ -3,9 +3,9 @@ from tkinter import filedialog
 import tkinter as tk
 import chevron
 from pathlib import Path
-import run_training
+#import run_training #todo fixme
 from simpletextgenerator.models.config import Config
-from simpletextgenerator.training import TrainingStatus
+from simpletextgenerator.training_status import TrainingStatus
 
 
 def draw_edit_existing_job_window():
@@ -34,7 +34,8 @@ class EditJobWindow:
     def edit_existing_job_select_updated(self, selected_value):
         self.project_name_edit_text = selected_value
         self.selected_project_name.set(selected_value)
-        loaded_job = run_training.create_job(f"./projects/{selected_value}")
+        # loaded_job = run_training.create_job(f"./projects/{selected_value}")
+        loaded_job = None #todo fixme
         loaded_config = loaded_job.config
         temperature_strings = ['{:.2f}'.format(temp) for temp in loaded_config.temperatures_to_generate]
         temperature_string = ",".join(temperature_strings)

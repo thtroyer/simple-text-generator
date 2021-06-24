@@ -388,7 +388,7 @@ class SubprocessProtocol(asyncio.SubprocessProtocol):
             if run_with_mock_data is not None and run_with_mock_data:
                 process = 'simpletextgenerator/mock/mock_run_training.py'
 
-            transport = self.loop.run_until_complete(self.loop.subprocess_exec(SubprocessProtocol, 'python', process))[
-                0]
+            #todo check for exe
+            self.loop.run_until_complete(self.loop.subprocess_exec(SubprocessProtocol, 'python', process))[0]
 
             self.loop.run_forever()
