@@ -35,7 +35,6 @@ class NewJobWindow:
         self.new_batch_job_window = None
         self.new_job_load_model_window = None
 
-        raise Exception("Project already exists. Dir: " )
         self.number_of_iterations = None
         self.project_name = None
         self.dropout = None
