@@ -2,6 +2,9 @@ import os
 import shutil
 import tkinter as tk
 
+import logging
+logger = logging.getLogger("ui")
+
 
 def draw_archive_delete_window():
     draw_archive_delete_window = ArchiveDeleteWindow()
@@ -37,7 +40,7 @@ class ArchiveDeleteWindow:
             return
         shutil.move(f"projects/{self.selected_project_name.get()}", f"projects/archive/{self.selected_project_name.get()}")
         self.selected_project_name.set("Select a project")
-        #todo update options instead of destroying window
+        # todo update options instead of destroying window
         self.destroy_window()
 
     def delete_project(self):

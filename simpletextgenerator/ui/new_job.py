@@ -9,6 +9,9 @@ from shutil import copyfile
 from simpletextgenerator.models.config import Config
 from simpletextgenerator.training_status import TrainingStatus
 
+import logging
+logger = logging.getLogger("ui")
+
 
 def draw_new_job_window():
     new_job_window = NewJobWindow()
@@ -32,6 +35,7 @@ class NewJobWindow:
         self.new_batch_job_window = None
         self.new_job_load_model_window = None
 
+        raise Exception("Project already exists. Dir: " )
         self.number_of_iterations = None
         self.project_name = None
         self.dropout = None
@@ -244,11 +248,7 @@ class NewJobWindow:
             f.write(self.render_state_file_text())
 
     def copy_training_file(self, project_path):
-        # todo: cleanup getting to project dir
-        # todo: cleanup dir/path variables
-        current_dir = Path(__file__).parent
-        project_dir = str(current_dir.parent.parent.resolve()) + "/" + project_path
-        copyfile(self.training_file_origin_path, project_dir +  "/" + self.training_file)
+        copyfile(self.training_file_origin_path, f"./{project_path}/{self.training_file}")
 
     def render_state_file_text(self):
         status = TrainingStatus.NEW
@@ -319,7 +319,6 @@ class NewJobWindow:
             print(e)
             raise e
 
-
     def draw_new_batch_job_window(self):
         if self.new_batch_job_window is not None:
             self.new_batch_job_window = None
@@ -387,4 +386,3 @@ class NewJobWindow:
         self.batch_training_files = tk.filedialog.askopenfilenames(title='Choose a file')
 
         # self.button_open_model_file['text'] = self.model_to_load
-
