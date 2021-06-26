@@ -4,6 +4,9 @@ from warnings import showwarning
 
 from simpletextgenerator.ui import new_job, edit_job, training, archive_delete
 
+import logging
+logger = logging.getLogger("ui")
+
 
 class MenuWindow:
     def draw_main_window(self):

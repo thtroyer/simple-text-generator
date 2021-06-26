@@ -1,14 +1,10 @@
 import os
 
 from textgenrnn import textgenrnn
+
+from simpletextgenerator.jobs_util import resource_path
 from simpletextgenerator.models.job import Job
-
-
-class TrainingStatus:
-    NEW = "NEW"
-    NEW_LOAD_MODEL = "NEW_LOAD_MODEL"
-    STARTED = "STARTED"
-    FINISHED = "FINISHED"
+from simpletextgenerator.training_status import TrainingStatus
 
 
 class Train:
@@ -133,5 +129,5 @@ class Train:
             f.write(self.render_state_file_text())
 
     def render_state_file_text(self) -> str:
-        with open('templates/state.yml.mustache', 'r') as f:
+        with open(resource_path('templates/state.yml.mustache'), 'r') as f:
             return self.state.render(f)

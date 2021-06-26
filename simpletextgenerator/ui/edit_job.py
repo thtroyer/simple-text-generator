@@ -3,9 +3,9 @@ from tkinter import filedialog
 import tkinter as tk
 import chevron
 from pathlib import Path
-import run_training
+from simpletextgenerator.jobs_util import create_job, resource_path
 from simpletextgenerator.models.config import Config
-from simpletextgenerator.training import TrainingStatus
+from simpletextgenerator.training_status import TrainingStatus
 
 
 def draw_edit_existing_job_window():
@@ -37,7 +37,7 @@ class EditJobWindow:
     def edit_existing_job_select_updated(self, selected_value):
         self.project_name_edit_text = selected_value
         self.selected_project_name.set(selected_value)
-        loaded_job = run_training.create_job(f"./projects/{selected_value}")
+        loaded_job = create_job(selected_value)
         loaded_config = loaded_job.config
         temperature_strings = ['{:.2f}'.format(temp) for temp in loaded_config.temperatures_to_generate]
         temperature_string = ",".join(temperature_strings)
@@ -157,7 +157,7 @@ class EditJobWindow:
         return project_list
 
     def render_config_file_text(self):
-        with open('templates/config.yml.mustache', 'r') as f:
+        with open(resource_path('templates/config.yml.mustache'), 'r') as f:
             config = Config(
                 training_file=self.training_file,
                 output_file="",
@@ -184,7 +184,7 @@ class EditJobWindow:
         if self.model_to_load is not None:
             status = TrainingStatus.NEW_LOAD_MODEL
 
-        with open('templates/state.yml.mustache', 'r') as f:
+        with open(resource_path('templates/state.yml.mustache'), 'r') as f:
             return (chevron.render(f, {
                 'status': status,
                 'iterations_run': 0,

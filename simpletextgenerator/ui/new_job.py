@@ -6,8 +6,13 @@ from pathlib import Path
 from os.path import splitext
 from tkinter import messagebox
 from shutil import copyfile
+
+from simpletextgenerator.jobs_util import resource_path
 from simpletextgenerator.models.config import Config
-from simpletextgenerator.training import TrainingStatus
+from simpletextgenerator.training_status import TrainingStatus
+
+import logging
+logger = logging.getLogger("ui")
 
 
 def draw_new_job_window():
@@ -217,7 +222,7 @@ class NewJobWindow:
             f.write(self.render_config_file_text())
 
     def render_config_file_text(self):
-        with open('templates/config.yml.mustache', 'r') as f:
+        with open(resource_path('templates/config.yml.mustache'), 'r') as f:
             config = Config(
                 training_file=self.training_file,
                 output_file="",
@@ -244,18 +249,14 @@ class NewJobWindow:
             f.write(self.render_state_file_text())
 
     def copy_training_file(self, project_path):
-        # todo: cleanup getting to project dir
-        # todo: cleanup dir/path variables
-        current_dir = Path(__file__).parent
-        project_dir = str(current_dir.parent.parent.resolve()) + "/" + project_path
-        copyfile(self.training_file_origin_path, project_dir +  "/" + self.training_file)
+        copyfile(self.training_file_origin_path, f"./{project_path}/{self.training_file}")
 
     def render_state_file_text(self):
         status = TrainingStatus.NEW
         if self.model_to_load is not None:
             status = TrainingStatus.NEW_LOAD_MODEL
 
-        with open('templates/state.yml.mustache', 'r') as f:
+        with open(resource_path('templates/state.yml.mustache'), 'r') as f:
             return (chevron.render(f, {
                 'status': status,
                 'iterations_run': 0,
@@ -318,7 +319,6 @@ class NewJobWindow:
             # todo remove
             print(e)
             raise e
-
 
     def draw_new_batch_job_window(self):
         if self.new_batch_job_window is not None:
@@ -387,4 +387,3 @@ class NewJobWindow:
         self.batch_training_files = tk.filedialog.askopenfilenames(title='Choose a file')
 
         # self.button_open_model_file['text'] = self.model_to_load
-

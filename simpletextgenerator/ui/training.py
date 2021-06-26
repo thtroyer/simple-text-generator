@@ -384,11 +384,13 @@ class SubprocessProtocol(asyncio.SubprocessProtocol):
 
         run_with_mock_data = os.environ.get('MOCK_UI_DATA')
         with contextlib.closing(self.loop):
-            process = 'run_training.py'
-            if run_with_mock_data is not None and run_with_mock_data:
-                process = 'simpletextgenerator/mock/mock_run_training.py'
-
-            transport = self.loop.run_until_complete(self.loop.subprocess_exec(SubprocessProtocol, 'python', process))[
-                0]
+            if os.path.exists("run_training.exe"):
+                process = 'run_training.exe'
+                self.loop.run_until_complete(self.loop.subprocess_exec(SubprocessProtocol, process))[0]
+            else:
+                process = 'run_training.py'
+                if run_with_mock_data is not None and run_with_mock_data:
+                    process = 'simpletextgenerator/mock/mock_run_training.py'
+                self.loop.run_until_complete(self.loop.subprocess_exec(SubprocessProtocol, 'python', process))[0]
 
             self.loop.run_forever()

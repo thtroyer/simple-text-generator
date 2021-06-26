@@ -1,11 +1,14 @@
-from time import sleep
-
 import yaml
 import os
 import shutil
+import sys
 
-from simpletextgenerator import training
+from simpletextgenerator import training, jobs_util
+from simpletextgenerator.jobs_util import resource_path
 from simpletextgenerator.models import job
+
+# the following unused import is needed for pyinstaller to build correctly
+import sklearn.utils._weight_vector
 
 project_dir = "./projects"
 to_run_dir = "to_run"
@@ -21,47 +24,20 @@ def create_project_from_files(input_files):
         new_project_dir = project_dir + "/" + to_run_dir + "/" + new_project_name
         os.mkdir(new_project_dir)
         os.rename(file, new_project_dir + "/" + new_project_name + ".txt")
-        shutil.copyfile("templates/config_defaults.yaml", new_project_dir + "/templates.yaml")
+        shutil.copyfile(resource_path("templates/config_defaults.yaml"), new_project_dir + "/templates.yaml")
 
 
 def create_jobs(dirs) -> list:
     new_jobs = []
     for project in dirs:
         try:
-            new_job = create_job(project)
+            new_job = jobs_util.create_job(project, project_dir)
             new_jobs.append(new_job)
         except RuntimeError:
             continue
         except FileNotFoundError:
             continue
     return new_jobs
-
-
-def create_job(project) -> job.Job:
-    project_root_path = os.path.abspath(project_dir)
-    project_name = os.path.basename(project)
-    config_data, state_data = None, None
-
-    if project.split("/")[-1] == "archive":
-        raise RuntimeError("skip archive")
-    if project.split("\\")[-1] == "archive":
-        raise RuntimeError("skip archive")
-
-    try:
-        with open(project + "/config.yaml", 'r') as config:
-            config_data = yaml.safe_load(config)
-    except FileNotFoundError as e:
-        print(f"Missing config.yaml. Unable to build {project} job.")
-        raise e
-
-    try:
-        with open(project + "/state.yaml", 'r') as state:
-            state_data = yaml.safe_load(state)
-    except FileNotFoundError as e:
-        print(f"Missing state.yaml. Unable to build {project} job.")
-        raise e
-
-    return job.Job(config_data, state_data, project_root_path, project_name, to_run_dir, output_dir)
 
 
 def sort_jobs(jobs_to_sort):
@@ -85,8 +61,7 @@ if __name__ == "__main__":
         print('')
         print('------------------------------------')
         print("No projects found for training.  Ctrl+c to exit terminal.")
-        exit(0)
-        input()
+        sys.exit(0)
 
     sort_jobs(jobs_to_run)
     train(jobs_to_run)
@@ -95,4 +70,3 @@ if __name__ == "__main__":
     print('------------------------------------')
     print("All done.  Ctrl+c to exit terminal.")
     input()
-
