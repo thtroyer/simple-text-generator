@@ -1,4 +1,5 @@
 import os
+import sys
 
 import yaml
 
@@ -35,3 +36,13 @@ def create_job(project, project_dir="./proejcts") -> job.Job:
         raise e
 
     return job.Job(config_data, state_data, project_root_path, project_name, "_", "_")
+
+
+def resource_path(relative_path):
+    try:
+        # for pyinstaller
+        base_path = sys._MEIPASS
+    except Exception as e:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)

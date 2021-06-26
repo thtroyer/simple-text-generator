@@ -6,6 +6,8 @@ from pathlib import Path
 from os.path import splitext
 from tkinter import messagebox
 from shutil import copyfile
+
+from simpletextgenerator.jobs_util import resource_path
 from simpletextgenerator.models.config import Config
 from simpletextgenerator.training_status import TrainingStatus
 
@@ -220,7 +222,7 @@ class NewJobWindow:
             f.write(self.render_config_file_text())
 
     def render_config_file_text(self):
-        with open('templates/config.yml.mustache', 'r') as f:
+        with open(resource_path('templates/config.yml.mustache'), 'r') as f:
             config = Config(
                 training_file=self.training_file,
                 output_file="",
@@ -254,7 +256,7 @@ class NewJobWindow:
         if self.model_to_load is not None:
             status = TrainingStatus.NEW_LOAD_MODEL
 
-        with open('templates/state.yml.mustache', 'r') as f:
+        with open(resource_path('templates/state.yml.mustache'), 'r') as f:
             return (chevron.render(f, {
                 'status': status,
                 'iterations_run': 0,

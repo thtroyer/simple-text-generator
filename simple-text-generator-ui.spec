@@ -1,6 +1,8 @@
 # -*- mode: python ; coding: utf-8 -*-
+
 spec_root = os.path.abspath(SPECPATH)
 block_cipher = None
+
 
 a = Analysis(['simple-text-generator-ui.py'],
              pathex=[spec_root],
@@ -32,3 +34,14 @@ exe = EXE(pyz,
           upx_exclude=[],
           runtime_tmpdir=None,
           console=True )
+
+
+# uncomment to build into dir
+#coll = COLLECT(exe,
+               #a.binaries,
+               #a.zipfiles,
+               #a.datas,
+               #strip=False,
+               #upx=True,
+               #upx_exclude=[],
+               #name='simple-text-generator-ui')

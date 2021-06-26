@@ -4,6 +4,7 @@ import shutil
 import sys
 
 from simpletextgenerator import training, jobs_util
+from simpletextgenerator.jobs_util import resource_path
 from simpletextgenerator.models import job
 
 # the following unused import is needed for pyinstaller to build correctly
@@ -23,7 +24,7 @@ def create_project_from_files(input_files):
         new_project_dir = project_dir + "/" + to_run_dir + "/" + new_project_name
         os.mkdir(new_project_dir)
         os.rename(file, new_project_dir + "/" + new_project_name + ".txt")
-        shutil.copyfile("templates/config_defaults.yaml", new_project_dir + "/templates.yaml")
+        shutil.copyfile(resource_path("templates/config_defaults.yaml"), new_project_dir + "/templates.yaml")
 
 
 def create_jobs(dirs) -> list:
