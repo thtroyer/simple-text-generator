@@ -6,7 +6,8 @@ name = "pypi"
 [packages]
 # I normally wouldn't fork a library nor point at a non-release, but textgenrnn's last release was some time ago and is broken as a library (but not on master).
 # This lets me have control of the library, when I upgrade it, and I can modify the source as needed as textgenrnn has been a stale project for a while.
-textgenrnn = {ref = "master", git = "git://github.com/thtroyer/textgenrnn"}
+#textgenrnn = {ref = "ee8b9e806d109c25566581f358a4a72b6f03929a", git = "git://github.com/thtroyer/textgenrnn"}
+textgenrnn = {ref = "master", git = "git://github.com/minimaxir/textgenrnn"}
 tensorflow = "==2.4.2" # unable to resolve keras at 2.5.0 currently
 chevron = "*"
 PyYAML = "*"

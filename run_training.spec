@@ -2,12 +2,14 @@
 
 spec_root = os.path.abspath(SPECPATH)
 block_cipher = None
+#path_to_virtualenv = "c:\\users\\tom\\.virtualenvs\\simple-text-generator_pipenv-bh3kuatq\\"
 
 a = Analysis(['run_training.py'],
              pathex=[spec_root],
              binaries=[],
+             #datas=[(f"{path_to_virtualenv}\\lib\\site-packages\\textgenrnn")],
              datas=[],
-             hiddenimports=["sklearn","scikit-learn","sklearn.utils"],
+             hiddenimports=["sklearn","scikit-learn","sklearn.utils", "sklearn.utils._weight_vector", "textgenrnn"],
              hookspath=[],
              runtime_hooks=[],
              excludes=[],
