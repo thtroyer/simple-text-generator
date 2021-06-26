@@ -3,9 +3,17 @@ from time import sleep
 import yaml
 import os
 import shutil
+import tensorflow
 
 from simpletextgenerator import training
 from simpletextgenerator.models import job
+
+# the following unused import is needed for pyinstaller to build correctly
+import sklearn.utils._weight_vector
+
+# Helps prevent a crash I was getting.  #todo evaluate
+gpus = tensorflow.config.experimental.list_physical_devices('GPU')
+tensorflow.config.experimental.set_memory_growth(gpus[0], True)
 
 project_dir = "./projects"
 to_run_dir = "to_run"
