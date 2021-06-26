@@ -29,11 +29,13 @@ exe = EXE(pyz,
           strip=False,
           upx=True,
           console=True )
-coll = COLLECT(exe,
-               a.binaries,
-               a.zipfiles,
-               a.datas,
-               strip=False,
-               upx=True,
-               upx_exclude=[],
-               name='run_training')
+
+# uncomment to build into dir
+#coll = COLLECT(exe,
+               #a.binaries,
+               #a.zipfiles,
+               #a.datas,
+               #strip=False,
+               #upx=True,
+               #upx_exclude=[],
+               #name='run_training')
