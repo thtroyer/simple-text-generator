@@ -3,9 +3,9 @@ from tkinter import filedialog
 import tkinter as tk
 import chevron
 from pathlib import Path
-import run_training
+from simpletextgenerator.jobs_util import create_job, resource_path
 from simpletextgenerator.models.config import Config
-from simpletextgenerator.training import TrainingStatus
+from simpletextgenerator.training_status import TrainingStatus
 
 
 def draw_edit_existing_job_window():
@@ -15,6 +15,7 @@ def draw_edit_existing_job_window():
 
 class EditJobWindow:
     def __init__(self):
+        self.selected_project_name.set("default")
         self.edit_job_window = None
 
         self.number_of_iterations = None
@@ -30,11 +31,13 @@ class EditJobWindow:
         self.training_file = None
         self.training_file_origin_path = None
         self.model_to_load = None
+        self.selected_project_name = None
+        self.project_name_select = None
 
     def edit_existing_job_select_updated(self, selected_value):
         self.project_name_edit_text = selected_value
         self.selected_project_name.set(selected_value)
-        loaded_job = run_training.create_job(f"./projects/{selected_value}")
+        loaded_job = create_job(selected_value)
         loaded_config = loaded_job.config
         temperature_strings = ['{:.2f}'.format(temp) for temp in loaded_config.temperatures_to_generate]
         temperature_string = ",".join(temperature_strings)
@@ -61,6 +64,7 @@ class EditJobWindow:
             self.edit_job_window = None
 
         edit_job_window = tk.Tk()
+        self.selected_project_name = tk.StringVar(edit_job_window)
         edit_job_window.title("Edit existing job - simple-text-generator")
         main_frame = tk.Frame(edit_job_window)
         main_frame.grid()
@@ -68,8 +72,7 @@ class EditJobWindow:
         tk.Label(top_frame, text="Project Name:").grid(row=0, column=0)
         bottom_frame = tk.Frame(main_frame)
         option_list = self.get_projects_from_disk()
-        self.selected_project_name = tk.StringVar()
-        self.selected_project_name.set(option_list[0])
+        self.selected_project_name.set("Select a project")
         self.project_name_select = tk.OptionMenu(
             top_frame,
             self.selected_project_name,
@@ -77,7 +80,7 @@ class EditJobWindow:
             command=self.edit_existing_job_select_updated
         )
 
-        self.project_name_select.config(width=10)
+        self.project_name_select.config(width=30)
         self.project_name_select.grid(row=0, column=1)
 
         tk.Button(bottom_frame, text='Cancel', command=self.destroy_window()).grid(row=0, column=0)
@@ -154,7 +157,7 @@ class EditJobWindow:
         return project_list
 
     def render_config_file_text(self):
-        with open('templates/config.yml.mustache', 'r') as f:
+        with open(resource_path('templates/config.yml.mustache'), 'r') as f:
             config = Config(
                 training_file=self.training_file,
                 output_file="",
@@ -181,7 +184,7 @@ class EditJobWindow:
         if self.model_to_load is not None:
             status = TrainingStatus.NEW_LOAD_MODEL
 
-        with open('templates/state.yml.mustache', 'r') as f:
+        with open(resource_path('templates/state.yml.mustache'), 'r') as f:
             return (chevron.render(f, {
                 'status': status,
                 'iterations_run': 0,

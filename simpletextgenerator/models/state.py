@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from typing import IO
 import chevron
+import logging
+logger = logging.getLogger("ui")
 
 
 @dataclass
