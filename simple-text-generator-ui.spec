@@ -7,9 +7,7 @@ block_cipher = None
 a = Analysis(['simple-text-generator-ui.py'],
              pathex=[spec_root],
              binaries=[],
-             datas=[
-                ('templates/*', 'templates')
-             ],
+             datas=[('templates/*', 'templates')],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
