@@ -1,4 +1,5 @@
 import os
+from shutil import copyfile
 from tkinter import filedialog
 import tkinter as tk
 import chevron
@@ -15,7 +16,11 @@ def draw_edit_existing_job_window():
 
 class EditJobWindow:
     def __init__(self):
-        self.selected_project_name.set("default")
+        try:
+            self.selected_project_name.set("default")
+        except AttributeError:
+            #todo fix
+            pass
         self.edit_job_window = None
 
         self.number_of_iterations = None
@@ -33,10 +38,12 @@ class EditJobWindow:
         self.model_to_load = None
         self.selected_project_name = None
         self.project_name_select = None
+        self.project_name = ""
 
     def edit_existing_job_select_updated(self, selected_value):
         self.project_name_edit_text = selected_value
         self.selected_project_name.set(selected_value)
+        self.project_name = selected_value
         loaded_job = create_job(selected_value)
         loaded_config = loaded_job.config
         temperature_strings = ['{:.2f}'.format(temp) for temp in loaded_config.temperatures_to_generate]
@@ -198,6 +205,7 @@ class EditJobWindow:
     def set_training_file(self):
         self.training_file_origin_path = self.open_file_dialog("txt")
         self.training_file = Path(self.training_file_origin_path).name
+        copyfile(self.training_file_origin_path, f"projects/{self.project_name}/{self.training_file}")
         self.button_open_training_file['text'] = self.training_file
 
     @staticmethod
