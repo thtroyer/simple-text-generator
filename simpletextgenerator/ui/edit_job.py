@@ -19,7 +19,7 @@ class EditJobWindow:
         try:
             self.selected_project_name.set("default")
         except AttributeError:
-            #todo fix
+            # todo fix
             pass
         self.edit_job_window = None
 

@@ -12,6 +12,7 @@ from simpletextgenerator.models.config import Config
 from simpletextgenerator.training_status import TrainingStatus
 
 import logging
+
 logger = logging.getLogger("ui")
 
 

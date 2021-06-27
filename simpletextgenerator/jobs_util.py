@@ -6,7 +6,9 @@ import yaml
 from simpletextgenerator.models import job
 
 import logging
+
 logger = logging.getLogger("ui")
+
 
 # moved helper method out of run_training.py to make it available to the UI without pulling in
 # the textgenrnn dependencies when building a pyinstaller exe

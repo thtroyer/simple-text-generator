@@ -1,7 +1,9 @@
 from simpletextgenerator.models import config, state
 
 import logging
+
 logger = logging.getLogger("ui")
+
 
 class Job:
     def __init__(self, config_data, state_data, project_root_dir, job_name, input_folder, output_folder):
