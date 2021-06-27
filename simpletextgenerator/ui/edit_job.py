@@ -44,7 +44,7 @@ class EditJobWindow:
         self.project_name_edit_text = selected_value
         self.selected_project_name.set(selected_value)
         self.project_name = selected_value
-        loaded_job = create_job(selected_value)
+        loaded_job = create_job(f"projects/{selected_value}")
         loaded_config = loaded_job.config
         temperature_strings = ['{:.2f}'.format(temp) for temp in loaded_config.temperatures_to_generate]
         temperature_string = ",".join(temperature_strings)
