@@ -266,6 +266,12 @@ class NewJobWindow:
 
     def set_training_file(self):
         self.training_file_origin_path = self.open_file_dialog("txt")
+        if self.new_job_load_model_window is not None:
+            self.new_job_load_model_window.lift()
+        if self.new_job_window is not None:
+            self.new_job_window.lift()
+        if self.new_batch_job_window is not None:
+            self.new_batch_job_window.lift()
         self.training_file = Path(self.training_file_origin_path).name
         self.button_open_training_file['text'] = self.training_file
 
@@ -297,6 +303,7 @@ class NewJobWindow:
 
     def set_model_file(self):
         self.model_to_load_origin_path = self.open_file_dialog("hdf5")
+        self.new_job_load_model_window.lift()
         self.model_to_load = Path(self.model_to_load_origin_path).name
         self.button_open_model_file['text'] = self.model_to_load
 
@@ -338,7 +345,7 @@ class NewJobWindow:
         model_frame = tk.Frame(main_frame, relief="raised", borderwidth=3)
         model_frame.grid(row=1, column=0)
         tk.Label(model_frame, text="Training file").grid(row=0, column=0)
-        self.button_open_training_file = tk.Button(model_frame, text="Select a file",
+        self.button_open_training_file = tk.Button(model_frame, text="Select files",
                                                    command=self.set_training_file_batch)
         self.button_open_training_file.grid(row=0, column=1)
 
@@ -382,7 +389,5 @@ class NewJobWindow:
         bottom_frame.grid(row=3, column=0)
 
     def set_training_file_batch(self):
-        # root = tk.Tk()
         self.batch_training_files = tk.filedialog.askopenfilenames(title='Choose a file')
-
-        # self.button_open_model_file['text'] = self.model_to_load
+        self.new_job_window.lift()

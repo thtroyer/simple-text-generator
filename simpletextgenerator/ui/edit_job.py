@@ -204,6 +204,7 @@ class EditJobWindow:
 
     def set_training_file(self):
         self.training_file_origin_path = self.open_file_dialog("txt")
+        self.edit_job_window.lift()
         self.training_file = Path(self.training_file_origin_path).name
         copyfile(self.training_file_origin_path, f"projects/{self.project_name}/{self.training_file}")
         self.button_open_training_file['text'] = self.training_file
