@@ -42,7 +42,7 @@ class Train:
 
     def load_model(self, model_name):
         print("Loading model")
-        path = f"{self.job.config.project_root_dir}/{self.job.config.job_name}/{model_name}"
+        path = f"projects/{self.job.config.job_name}/{model_name}"
         if path[-5:] != ".hdf5":
             path = f"{path}.hdf5"
 

@@ -25,7 +25,7 @@ class MenuWindow:
 
         tk.Button(
             main_frame,
-            text='Create new batch job',
+            text='Create new jobs in batch',
             command=new_job.draw_new_batch_job_window,
             width=35
         ).pack()

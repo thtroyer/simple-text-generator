@@ -35,7 +35,7 @@ def create_jobs(dirs) -> list:
     new_jobs = []
     for project in dirs:
         try:
-            new_job = jobs_util.create_job(project, project_dir)
+            new_job = jobs_util.create_job(project)
             new_jobs.append(new_job)
         except RuntimeError:
             continue

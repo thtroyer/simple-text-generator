@@ -293,9 +293,7 @@ class NewJobWindow:
             raise e
 
     def copy_model_file(self, project_path):
-        current_dir = Path(__file__).parent
-        copyfile(self.model_to_load_origin_path,
-                 str(current_dir) + "/" + project_path + "/" + f"m_{self.model_to_load}")
+        copyfile(self.model_to_load_origin_path, f"{project_path}/m_{self.model_to_load}")
 
     def set_model_file(self):
         self.model_to_load_origin_path = self.open_file_dialog("hdf5")
@@ -326,7 +324,7 @@ class NewJobWindow:
             self.new_batch_job_window = None
 
         new_job_window = tk.Tk()
-        new_job_window.title("Create New Batch Job - simple-text-generator")
+        new_job_window.title("Create New Batch Jobs - simple-text-generator")
         main_frame = tk.Frame(new_job_window)
         main_frame.grid()
         top_frame = tk.Frame(main_frame)
