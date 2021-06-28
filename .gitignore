@@ -4,6 +4,7 @@ venv
 env/*
 venv/*
 __pycache__/
+Pipfile.lock
 
 # pycharm
 .idea*
@@ -14,3 +15,6 @@ __pycache__/
 # pyinstaller
 build/*
 dist/*
+
+#misc
+*.log
