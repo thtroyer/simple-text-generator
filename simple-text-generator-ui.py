@@ -1,13 +1,13 @@
 import hashlib
 import logging
+import pathlib
 import subprocess
 import sys
 import os
 
+from simpletextgenerator.logging_setup import setup_logging
 from simpletextgenerator.ui.menu import draw_main_menu
 
-log_file_name = "simple-text-generator-ui.log"
-previous_log_file_name = "simple-text-generator-ui_previous.log"
 version = "0.2_unreleased"
 logger = logging.getLogger("ui")
 
@@ -48,29 +48,6 @@ def create_dir_if_not_exists(directory):
         os.makedirs(directory)
 
 
-def archive_last_log():
-    if os.path.exists(log_file_name):
-        if os.path.exists(previous_log_file_name):
-            os.remove(previous_log_file_name)
-        os.rename(log_file_name, previous_log_file_name)
-
-
-def setup_logging():
-    global logger
-    logger.setLevel(logging.DEBUG)
-    archive_last_log()
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    # logging.basicConfig(filename=log_file_name, filemode='w', formatter=formatter)
-    logger = logging.getLogger("ui")
-    logger.setLevel(logging.DEBUG)
-    stdout_handler = logging.StreamHandler(stream=sys.stdout)
-    logger.addHandler(stdout_handler)
-    file_handler = logging.FileHandler(filename=log_file_name, mode="w")
-    file_handler.setLevel(logging.DEBUG)
-    file_handler.setFormatter(formatter)
-    logger.addHandler(file_handler)
-
-
 def log_environment():
     logger.info(sys.version)
     logger.info(f"Platform: {sys.platform}")
@@ -84,13 +61,15 @@ def log_environment():
 
 
 if __name__ == "__main__":
-    setup_logging()
+    pathlib.Path('logs').mkdir(exist_ok=True)
+    log_file_name = "logs/simple-text-generator-ui.log"
+    previous_log_file_name = "logs/simple-text-generator-ui_previous.log"
+    setup_logging(logger, log_file_name, previous_log_file_name)
     log_environment()
     create_dir_if_not_exists("projects")
     create_dir_if_not_exists("projects/archive")
     try:
         window_manager = draw_main_menu()
-        window_manager.draw_main_window()
     except Exception as e:
         logger.error(e)
         raise e

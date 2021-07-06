@@ -8,6 +8,8 @@ from simpletextgenerator.jobs_util import create_job, resource_path
 from simpletextgenerator.models.config import Config
 from simpletextgenerator.training_status import TrainingStatus
 
+import logging
+logger = logging.getLogger("ui")
 
 def draw_edit_existing_job_window():
     edit_existing_job_window = EditJobWindow()
@@ -142,7 +144,7 @@ class EditJobWindow:
             self.edit_job_window.destroy()
         except Exception as e:
             # todo remove
-            print(e)
+            logger.error(e)
             raise e
 
     def create_config_file(self, path):

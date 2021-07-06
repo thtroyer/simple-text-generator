@@ -136,7 +136,7 @@ class NewJobWindow:
             self.new_job_window.destroy()
         except Exception as e:
             # todo remove
-            print(e)
+            logger.error(e)
             raise e
 
     def draw_new_job_load_model_window(self):
@@ -215,7 +215,7 @@ class NewJobWindow:
             messagebox.showerror(title="Error", message="Project already exists.")
             raise Exception("Project already exists. Dir: " + path)
 
-        print("Creating dir: " + path)
+        logger.info("Creating dir: " + path)
         os.makedirs(path)
 
     def create_config_file(self, path):
@@ -295,7 +295,7 @@ class NewJobWindow:
             self.new_job_load_model_window.destroy()
         except Exception as e:
             # todo remove
-            print(e)
+            logger.error(e)
             raise e
 
     def copy_model_file(self, project_path):
@@ -323,7 +323,7 @@ class NewJobWindow:
             self.new_job_window.destroy()
         except Exception as e:
             # todo remove
-            print(e)
+            logger.error(e)
             raise e
 
     def draw_new_batch_job_window(self):

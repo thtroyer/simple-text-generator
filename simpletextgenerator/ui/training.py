@@ -2,9 +2,7 @@ import asyncio
 import collections
 import contextlib
 import os
-import locale
 import re
-import sys
 import threading
 import tkinter
 import tkinter as tk
@@ -12,8 +10,10 @@ from tkinter import ttk
 from queue import Queue
 from tkinter.scrolledtext import ScrolledText
 
+import logging
 
-# todo clean up this file
+logger = logging.getLogger("ui")
+
 
 def create_training_window():
     TrainingRunner().begin_work()
@@ -150,8 +150,11 @@ class TrainingWindow:
         # self.project_progress_label.grid(row=3, column=0)
         # self.project_progress = ttk.Progressbar(status_frame, orient=tk.HORIZONTAL, maximum=100, length=300, mode='determinate')
         # self.project_progress.grid(row=3, column=1)
-        self.project_progress_label = tk.Label(status_frame,
-                                               text="This UI is a work in progress and not representative of final design.")
+        self.project_progress_label = tk.Label(
+            status_frame,
+            text="This UI is a work in progress and not representative of final design. \n" +
+                 " See the milestones page on GitHub for progress.                      "
+        )
         self.project_progress_label.grid(row=3, column=0)
 
         top_frame.grid(row=0, column=0)
@@ -207,21 +210,25 @@ class TrainingWindow:
         text = str.replace(text, '\b', '')
         # text = str.replace(text, '\r', '')
 
-        if type == "stderr":
-            print(text, file=sys.stderr)
-        else:
-            print(text, file=sys.stdout)
+        # most of this data in unnecessary to log
+        # if type == "stderr":
+        #     logger.info(f"textgennrnn as error: {text}")
+        # else:
+        #     logger.info(f"textgenrnn: {text}")
 
         if self.is_progress_text(text):
             if self.is_progress_bar1(text):
                 percentage = self.get_percentage_bar1(text)
                 eta_text = self.get_progress_text_bar1(text)
                 loss_value = text.split("loss: ")[-1]
+                if loss_value.find("\r\n"):
+                    loss_value = loss_value.split("\r\n")[0]
                 try:
                     if loss_value != '':
                         self.running_mean_loss.add(float(loss_value))
-                except:
-                    print("loss parse: " + text)
+                except Exception as e:
+                    logger.warning(f"Unable to parse loss: {text}")
+                    logger.warning(e)
                 self.loss_value_label.config(text=str(self.running_mean_loss.mean()))
                 self.sub_progress_eta.config(text="Training model. " + eta_text)
             else:
@@ -251,7 +258,7 @@ class TrainingWindow:
                 if loss_value != '':
                     self.running_mean_loss.add(float(loss_value))
             except:
-                print("loss parse: " + text)
+                logger.warning(f"Unable to parse ETA: {text}")
             self.loss_value_label.config(text=str(self.running_mean_loss.mean()))
             self.sub_progress_eta.config(text="Training model. " + text.split("loss: ")[0])
             return
@@ -283,14 +290,14 @@ class TrainingWindow:
                 msg = self.stdout_queue.get(0)
                 self.process_text(msg, "stdout")
             except Exception as e:
-                print(e)
+                logger.error(e)
 
         while self.stderr_queue.qsize():
             try:
                 msg = self.stderr_queue.get(0)
                 self.process_text(msg, "stderr")
             except Exception as e:
-                print(e)
+                logger.error(e)
 
     def periodic_callback(self):
         self.update_ui()
@@ -304,9 +311,7 @@ class TrainingWindow:
         except ValueError:
             return 0
 
-        return int(
-            (arrow_position / len(cleaned_string)) * 100
-        )
+        return int((arrow_position / len(cleaned_string)) * 100)
 
     def get_percentage_bar2(self, text) -> int:
         pieces = text.split("%")
@@ -356,7 +361,8 @@ class SubprocessProtocol(asyncio.SubprocessProtocol):
             self.loop.stop()
 
     def pipe_data_received(self, fd, data):
-        text = data.decode(locale.getpreferredencoding(False))
+        # text = data.decode(locale.getpreferredencoding(False), encoding='utf-8')
+        text = data.decode("utf-8")
         if fd == 1:
             # stdout
             SubprocessProtocol.stdout_queue.put(text.strip())
