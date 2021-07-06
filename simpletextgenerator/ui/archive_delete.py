@@ -3,6 +3,7 @@ import shutil
 import tkinter as tk
 
 import logging
+from tkinter.messagebox import askyesno
 
 logger = logging.getLogger("ui")
 
@@ -41,15 +42,18 @@ class ArchiveDeleteWindow:
             return
         shutil.move(f"projects/{self.selected_project_name.get()}", f"projects/archive/{self.selected_project_name.get()}")
         self.selected_project_name.set("Select a project")
-        # todo update options instead of destroying window
         self.destroy_window()
 
     def delete_project(self):
         if self.selected_project_name.get() == '' or self.selected_project_name.get() == 'Select a project':
             return
-        shutil.rmtree(f"projects/{self.selected_project_name.get()}")
-        self.selected_project_name.set("Select a project")
-        self.destroy_window()
+        if askyesno(title='Delete confirmation', message='Are you sure you want to delete this project?'):
+            shutil.rmtree(f"projects/{self.selected_project_name.get()}")
+            self.selected_project_name.set("Select a project")
+            self.destroy_window()
+            return
+        self.archive_delete_window.lift()
+
 
     def draw_archive_delete_window(self):
         if self.archive_delete_window is not None:

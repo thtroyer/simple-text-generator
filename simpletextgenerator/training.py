@@ -1,17 +1,17 @@
+import logging
 import os
 
 from textgenrnn import textgenrnn
-
 from simpletextgenerator.jobs_util import resource_path
+from simpletextgenerator.logging_setup import setup_logging
 from simpletextgenerator.models.job import Job
 from simpletextgenerator.training_status import TrainingStatus
 
 
-class Train:
-    # todo capture texgenrnn output (loss, etc) for logging
-    # todo run until options (iterations? loss? time?)
 
-    def __init__(self, job: Job):
+class Train:
+    def __init__(self, job: Job, logger):
+        self.logger = logger
         self.job = job
         self.status = job.state.status
         self.last_saved_model = job.state.latest_model_saved
@@ -41,19 +41,21 @@ class Train:
         file_handle.close()
 
     def load_model(self, model_name):
-        print("Loading model")
+        self.logger.info("Loading model")
         path = f"projects/{self.job.config.job_name}/{model_name}"
         if path[-5:] != ".hdf5":
             path = f"{path}.hdf5"
-
         self.textgen.load(path)
 
     def run(self):
-        print("")
-        print("Loading project " + self.job.config.job_name)
+        log_file_name = "logs/simple-text-generator_training.log"
+        previous_log_file_name = "logs/simple-text-generator_training.log"
+        setup_logging(self.logger, log_file_name, previous_log_file_name)
+
+        self.logger.info("Loading project " + self.job.config.job_name)
 
         if self.state.status == TrainingStatus.FINISHED:
-            print("Project already completed.")
+            self.logger.info("Project already completed.")
             return
 
         if self.state.status == TrainingStatus.STARTED:
@@ -77,25 +79,24 @@ class Train:
         self.write_state_file()
 
     def save_final_model(self):
-        print("Saving final model")
+        self.logger.info("Saving final model")
         self.textgen.save(self.job.config.output_dir + "/model_" + str(self.state.iterations_run) + ".hdf5")
 
     def generate_final_text(self):
-        print("Generating final text")
+        self.logger.info("Generating final text")
         for temperature in self.job.config.temperatures_to_generate:
-            generated = self.textgen.generate(n=self.job.config.items_to_generate_at_end, return_as_list=True,
-                                              temperature=temperature)
+            generated = self.textgen.generate(n=self.job.config.items_to_generate_at_end, return_as_list=True, temperature=temperature)
             self.save_lines_to_file("last", temperature, generated)
 
     def save_model(self, model_name: str) -> None:
-        print("Saving model current")
+        self.logger.info("Saving model current")
         model_file_name = "model_" + model_name
         self.state.latest_model_saved = model_file_name
         self.textgen.save(
             self.job.config.project_root_dir + "/" + self.job.config.job_name + "/" + model_file_name + ".hdf5")
 
     def save_model_iteration(self, i) -> None:
-        print("Saving model")
+        self.logger.info("Saving model")
         if self.job.config.save_model_every_n_generations > 0:
             if (i % self.job.config.save_model_every_n_generations) == 0:
                 self.save_model(
@@ -103,13 +104,12 @@ class Train:
                 )
 
     def generate_text(self, i) -> None:
-        print("Generating text to output file.")
+        self.logger.info("Generating text to output file.")
         if self.job.config.generate_every_n_generations > 0:
             if (i % self.job.config.generate_every_n_generations) == 0:
                 for temperature in self.job.config.temperatures_to_generate:
                     try:
-                        generated = self.textgen.generate(n=self.job.config.items_to_generate_each_generation,
-                                                          return_as_list=True, temperature=temperature)
+                        generated = self.textgen.generate(n=self.job.config.items_to_generate_each_generation, return_as_list=True, temperature=temperature)
                     except KeyError:
                         continue
                     self.save_lines_to_file(i * self.job.config.generate_every_n_generations, temperature, generated)
@@ -123,7 +123,7 @@ class Train:
         )
 
     def write_state_file(self) -> None:
-        print("Updating state")
+        self.logger.info("Updating state")
         path = f"{self.job.config.project_root_dir}/{self.job.config.job_name}"
         with open(path + '/state.yaml', 'w') as f:
             f.write(self.render_state_file_text())
