@@ -7,9 +7,13 @@ See the [milestones](https://github.com/thtroyer/simple-text-generator/milestone
 
 Also see [CHANGELOG.md](https://github.com/thtroyer/simple-text-generator/blob/master/CHANGELOG.md) for project history.
 
-## Releases 
+## Usage 
 
 There are Windows binaries available soon.  This is by far the easiest way to run simple-text-generator.  Created with PyInstaller, it includes all dependencies including Python.
+
+Best way to learn ML is by trying it out.  Fire up the UI, throw some data at it, and see the results.
+
+Also check the [wiki](https://github.com/thtroyer/simple-text-generator/wiki) for additional information and known issues.
 
 ## Development environment
 
