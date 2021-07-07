@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Run training/generation within UI
 - Archive / delete functionality in UI
 - Windows build for release
+- Logging to file
 ### Changed
 - UI code cleanup
 - Switched to pipenv
