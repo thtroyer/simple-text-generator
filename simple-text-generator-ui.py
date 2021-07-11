@@ -8,7 +8,7 @@ import os
 from simpletextgenerator.logging_setup import setup_logging
 from simpletextgenerator.ui.menu import draw_main_menu
 
-version = "0.2_unreleased"
+version = "0.3.0"
 logger = logging.getLogger("ui")
 
 
