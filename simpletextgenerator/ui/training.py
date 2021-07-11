@@ -164,6 +164,10 @@ class TrainingWindow:
 
     def add_text(self, text):
         text = text.encode("ascii", "ignore").decode()
+        windows_line_endings = "\r\n"
+        linux_line_endings = "\n"
+        text = text.replace(windows_line_endings, linux_line_endings)
+
         self.text_area.insert(tk.INSERT, text)
         self.text_area.insert(tk.INSERT, "\n")
         self.text_area.update_idletasks()
@@ -208,65 +212,31 @@ class TrainingWindow:
     def process_text(self, text: str, type: str):
         # cleaning up some garbage characters
         text = str.replace(text, '\b', '')
-        # text = str.replace(text, '\r', '')
+
 
         # most of this data in unnecessary to log
         # if type == "stderr":
-        #     logger.info(f"textgennrnn as error: {text}")
+        #     logger.debug(f"textgennrnn as error: {text}")
         # else:
-        #     logger.info(f"textgenrnn: {text}")
+        #     logger.debug(f"textgenrnn: {text}")
+
+        if not text.strip():
+            return
 
         if self.is_progress_text(text):
             if self.is_progress_bar1(text):
-                percentage = self.get_percentage_bar1(text)
-                eta_text = self.get_progress_text_bar1(text)
-                loss_value = text.split("loss: ")[-1]
-                if loss_value.find("\r\n"):
-                    loss_value = loss_value.split("\r\n")[0]
-                try:
-                    if loss_value != '':
-                        self.running_mean_loss.add(float(loss_value))
-                except Exception as e:
-                    logger.warning(f"Unable to parse loss: {text}")
-                    logger.warning(e)
-                self.loss_value_label.config(text=str(self.running_mean_loss.mean()))
-                self.sub_progress_eta.config(text="Training model. " + eta_text)
+                percentage = self.update_ui_for_progress_bar1(text)
             else:
-                percentage = self.get_percentage_bar2(text)
-                eta_text = self.get_progress_text_bar2(text)
-                generation_text = eta_text.split(",  ")[-1].split("]")[0]
-                if generation_text != '':
-                    generation_value = float(generation_text[:-4])
-                    if generation_text[-4:] == "s/it":
-                        generation_value = 1 / generation_value
-                    self.running_mean_generation.add(generation_value)
-                items_per_second = self.running_mean_generation.mean()
-                if items_per_second < 1:
-                    seconds_per_item = round(1 / items_per_second, 3)
-                    self.generation_value_label.config(text=str(seconds_per_item) + " sec/item")
-                else:
-                    self.generation_value_label.config(text=str(round(items_per_second, 3)) + " items/sec")
-                self.sub_progress_eta.config(text="Generating text. " + eta_text)
+                percentage = self.update_ui_for_progress_bar2(text)
 
             self.sub_progress["maximum"] = 100
             self.sub_progress["value"] = percentage
             return
         elif self.is_stray_ETA(text):
-            # sometimes ETA is on its own line, sometimes it is bundled with progressbar
-            loss_value = text.split("loss: ")[-1]
-            try:
-                if loss_value != '':
-                    self.running_mean_loss.add(float(loss_value))
-            except:
-                logger.warning(f"Unable to parse ETA: {text}")
-            self.loss_value_label.config(text=str(self.running_mean_loss.mean()))
-            self.sub_progress_eta.config(text="Training model. " + text.split("loss: ")[0])
+            self.update_ui_for_progress_bar1_when_broken(text)
             return
 
         if type == "stderr":
-            return
-
-        if not text.strip():
             return
 
         if self.is_found_projects_statement(text):
@@ -282,7 +252,58 @@ class TrainingWindow:
             self.update_project_label()
             return
 
+        if "####################" in text:
+            text = "\n\n" + text
+
+        if "Generating text to " in text:
+            text = "\n\n" + text
+
         self.add_text(text)
+
+    def update_ui_for_progress_bar1_when_broken(self, text):
+        # sometimes ETA is on its own line, sometimes it is bundled with progressbar
+        loss_value = text.split("loss: ")[-1]
+        try:
+            if loss_value != '':
+                self.running_mean_loss.add(float(loss_value))
+        except:
+            logger.warning(f"Unable to parse ETA: {text}")
+        self.loss_value_label.config(text=str(self.running_mean_loss.mean()))
+        self.sub_progress_eta.config(text="Training model. " + text.split("loss: ")[0])
+
+    def update_ui_for_progress_bar2(self, text):
+        percentage = self.get_percentage_bar2(text)
+        eta_text = self.get_progress_text_bar2(text)
+        generation_text = eta_text.split(",  ")[-1].split("]")[0]
+        if generation_text != '':
+            generation_value = float(generation_text[:-4])
+            if generation_text[-4:] == "s/it":
+                generation_value = 1 / generation_value
+            self.running_mean_generation.add(generation_value)
+        items_per_second = self.running_mean_generation.mean()
+        if items_per_second < 1:
+            seconds_per_item = round(1 / items_per_second, 3)
+            self.generation_value_label.config(text=str(seconds_per_item) + " sec/item")
+        else:
+            self.generation_value_label.config(text=str(round(items_per_second, 3)) + " items/sec")
+        self.sub_progress_eta.config(text="Generating text. " + eta_text)
+        return percentage
+
+    def update_ui_for_progress_bar1(self, text):
+        percentage = self.get_percentage_bar1(text)
+        eta_text = self.get_progress_text_bar1(text)
+        loss_value = text.split("loss: ")[-1]
+        if loss_value.find("\r\n"):
+            loss_value = loss_value.split("\r\n")[0]
+        try:
+            if loss_value != '':
+                self.running_mean_loss.add(float(loss_value))
+        except Exception as e:
+            logger.warning(f"Unable to parse loss: {text}")
+            logger.warning(e)
+        self.loss_value_label.config(text=str(self.running_mean_loss.mean()))
+        self.sub_progress_eta.config(text="Training model. " + eta_text)
+        return percentage
 
     def update_ui(self):
         while self.stdout_queue.qsize():

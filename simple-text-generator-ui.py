@@ -53,10 +53,10 @@ def log_environment():
     logger.info(f"Platform: {sys.platform}")
     logger.info(f"simple-text-generator code version: {version}")
     commit = get_git_hash_or_empty()
-    if commit is not "":
+    if commit != "":
         logger.info(f"commit: {commit}")
     hashes = get_exe_hashes()
-    if hashes is not "":
+    if hashes != "":
         logger.info(f"{hashes}")
 
 
