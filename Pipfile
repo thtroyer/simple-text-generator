@@ -13,6 +13,8 @@ pipfile = "*"
 
 [dev-packages]
 pyinstaller = "*"
+pytest = "*"
+coverage = "*"
 
 [requires]
 python_version = "3.8"
