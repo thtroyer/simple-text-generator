@@ -13,8 +13,12 @@ from simpletextgenerator.logging_setup import setup_logging
 import sklearn.utils._weight_vector
 
 # Helps prevent a crash I was getting.  #todo evaluate
-gpus = tensorflow.config.experimental.list_physical_devices('GPU')
-tensorflow.config.experimental.set_memory_growth(gpus[0], True)
+try:
+    gpus = tensorflow.config.experimental.list_physical_devices('GPU')
+    tensorflow.config.experimental.set_memory_growth(gpus[0], True)
+except IndexError as ignored:
+    pass
+
 
 project_dir = "./projects"
 to_run_dir = "to_run"

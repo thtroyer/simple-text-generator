@@ -99,33 +99,33 @@ class EditJobWindow:
 
         model_frame = tk.Frame(main_frame, relief="raised", borderwidth=3)
         model_frame.grid(row=1, column=0)
-        tk.Label(model_frame, text="Training file").grid(row=0, column=0)
+        tk.Label(model_frame, text="Training file").grid(row=0, column=0, sticky='e')
         self.button_open_training_file = tk.Button(model_frame, text="Select a file",
                                                    command=self.set_training_file)
         self.button_open_training_file.grid(row=0, column=1)
 
-        tk.Label(model_frame, text="Number of iterations:").grid(row=1, column=0)
+        tk.Label(model_frame, text="Number of iterations:").grid(row=1, column=0, sticky='e')
         self.number_of_iterations = tk.Entry(model_frame)
         self.number_of_iterations.grid(row=1, column=1)
-        tk.Label(model_frame, text="Dropout (keep low, ~0-0.2):").grid(row=2)
+        tk.Label(model_frame, text="Dropout (keep low, ~0-0.2):").grid(row=2, sticky='e')
         self.dropout = tk.Entry(model_frame)
         self.dropout.grid(row=2, column=1)
-        tk.Label(model_frame, text="Training Data Percent, 0-1.0):").grid(row=3)
+        tk.Label(model_frame, text="Training Data Percent, 0-1.0):").grid(row=3, sticky='e')
         self.training_data_percent = tk.Entry(model_frame)
         self.training_data_percent.grid(row=3, column=1)
-        tk.Label(model_frame, text="Temperatures to generate:").grid(row=4)
+        tk.Label(model_frame, text="Temperatures to generate:").grid(row=4, sticky='e')
         self.temperatures_to_generate = tk.Entry(model_frame)
         self.temperatures_to_generate.grid(row=4, column=1)
-        tk.Label(model_frame, text="Items to generate between generations:").grid(row=5)
+        tk.Label(model_frame, text="Items to generate between generations:").grid(row=5, sticky='e')
         self.items_to_generate_between_generations = tk.Entry(model_frame)
         self.items_to_generate_between_generations.grid(row=5, column=1)
-        tk.Label(model_frame, text="Generate every _ generations:").grid(row=6)
+        tk.Label(model_frame, text="Generate every _ generations:").grid(row=6, sticky='e')
         self.generation_frequency = tk.Entry(model_frame)
         self.generation_frequency.grid(row=6, column=1)
-        tk.Label(model_frame, text="Save model every _ generations:").grid(row=7)
+        tk.Label(model_frame, text="Save model every _ generations:").grid(row=7, sticky='e')
         self.save_frequency = tk.Entry(model_frame)
         self.save_frequency.grid(row=7, column=1)
-        tk.Label(model_frame, text="Items to generate at end:").grid(row=8)
+        tk.Label(model_frame, text="Items to generate at end:").grid(row=8, sticky='e')
         self.items_to_generate_at_end = tk.Entry(model_frame)
         self.items_to_generate_at_end.grid(row=8, column=1)
 
@@ -163,6 +163,8 @@ class EditJobWindow:
                 project_list.append(path)
 
         project_list.remove("archive")
+        if len(project_list) == 0:
+            project_list.append("No projects.")
         return project_list
 
     def render_config_file_text(self):

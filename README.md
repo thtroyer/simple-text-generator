@@ -22,6 +22,7 @@ The following instructions are examples; adapt them for your needs.
 Requires:
 
  - <= Python 3.8 (not sure earliest version) due to Tensorflow incompatibilities with Python 3.9+ right now.
+   - Recommend using pyenv to install latest 3.8
  - pipenv  See https://pypi.org/project/pipenv/
  - Optional Tensorflow CUDA libraries for GPU training.  CPU training is used otherwise.  Be warned that setup is not straightforward and I currently do not have instructions.
 
