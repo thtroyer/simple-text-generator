@@ -1,5 +1,4 @@
 import asyncio
-import collections
 import contextlib
 import os
 import re
@@ -14,28 +13,15 @@ import logging
 
 logger = logging.getLogger("ui")
 
+# TODO
+# - new layout
+# - show all steps and progress towards them
+# - calculate total ETA
+# - time since last save
 
 def create_training_window():
     TrainingRunner().begin_work()
 
-
-class RunningMean:
-    def __init__(self, max_number_of_elements=100):
-        self.max_number_of_elements = max_number_of_elements
-        self.number_of_elements = 0
-        self.elements = collections.deque(maxlen=max_number_of_elements)
-
-    def add(self, number):
-        self.elements.append(number)
-
-    def mean(self):
-        total = 0
-        num_elements = 0
-        for i in self.elements:
-            total += i
-            num_elements += 1
-
-        return round(total / num_elements, 3)
 
 
 class TrainingRunner:
@@ -340,10 +326,10 @@ class TrainingWindow:
 
     def update_project_label(self):
         current_project = self.projects_complete + 1
-        self.project_name_label.config(text=f"Running {current_project} of {self.total_projects}")
+        self.project_name_label.config(text=f"Projects: {current_project} of {self.total_projects}")
 
         if (current_project > self.total_projects):
-            self.project_name_label.config(text=f"Training and generation complete.")
+            self.project_name_label.config(text=f"Training and generation of all projects complete.")
 
     def is_stray_ETA(self, text):
         match1 = (re.search(r"^-\sETA:", text)) is not None
@@ -382,7 +368,6 @@ class SubprocessProtocol(asyncio.SubprocessProtocol):
             self.loop.stop()
 
     def pipe_data_received(self, fd, data):
-        # text = data.decode(locale.getpreferredencoding(False), encoding='utf-8')
         text = data.decode("utf-8")
         if fd == 1:
             # stdout
@@ -396,10 +381,12 @@ class SubprocessProtocol(asyncio.SubprocessProtocol):
             self._closed_stdout = True
         elif fd == 2:
             self._closed_stderr = True
+        SubprocessProtocol.stdout_queue.put("Pipe connection lost")
         self.signal_exit()
 
     def process_exited(self):
         self._exited = True
+        SubprocessProtocol.stdout_queue.put("Process exited")
         self.signal_exit()
 
     def run_training(self):

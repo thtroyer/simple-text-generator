@@ -18,6 +18,6 @@ def test_state_render():
     latest_model_saved = "some_model.hdf5"
     state = State(status, iterations_run, latest_model_saved)
 
-    with open("../../templates/state.yml.mustache", "r") as f:
+    with open("../templates/state.yml.mustache", "r") as f:
         assert state.render(f) == f"status: {status}\niterations_run: {iterations_run}\nlatest_model_saved: {latest_model_saved}\n"
 
