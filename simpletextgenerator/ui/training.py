@@ -5,11 +5,13 @@ import re
 import threading
 import tkinter
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, LEFT, BOTTOM, RIGHT, TOP
 from queue import Queue
 from tkinter.scrolledtext import ScrolledText
 
 import logging
+
+from simpletextgenerator.utility.RunningMean import RunningMean
 
 logger = logging.getLogger("ui")
 
@@ -52,7 +54,7 @@ class TrainingWindow:
         self.save_training_window = None
         self.back_training_window = None
         self.training_window = None
-        self.text_area = None
+        self.training_text = None
         self.tk = tk
         self.stdout_queue = stdout_queue
         self.stderr_queue = stderr_queue
@@ -65,11 +67,13 @@ class TrainingWindow:
         self.loss_value_label = None
         self.generation_label = None
         self.generation_value_label = None
+        self.status_text = None
 
         self.total_projects = 0
         self.projects_complete = 0
         self.running_mean_loss = RunningMean(10)
         self.running_mean_generation = RunningMean(100)
+
 
     def toggle_autoscroll(self):
         self.is_autoscroll = not self.is_autoscroll
@@ -85,11 +89,20 @@ class TrainingWindow:
         main_frame = tk.Frame(training_window)
         main_frame.grid()
         top_frame = tk.Frame(main_frame)
-        self.project_name_label = tk.Label(top_frame)
-        self.project_name_label.grid(row=0, column=0)
+
+        self.project_name_label = tk.Label(top_frame, width=20)
+        self.project_name_label.pack(side=LEFT, anchor=tkinter.NW, padx=10, pady=3)
+        checkbox = tk.Checkbutton(
+            top_frame,
+            text="Autoscroll text boxes",
+            command=self.toggle_autoscroll,
+        )
+        checkbox.pack(side=LEFT, anchor=tkinter.NE, padx=500, pady=3)
+        checkbox.select()
+
 
         text_frame = tk.Frame(main_frame)
-        text_area = ScrolledText(
+        training_text = ScrolledText(
             text_frame,
             wrap=tk.WORD,
             width=100,
@@ -97,19 +110,19 @@ class TrainingWindow:
             font=("Terminal", 7),
             state='normal'
         )
-        text_area.grid(row=0, column=0)
-        self.text_area = text_area
+        training_text.pack(side=LEFT)
+        self.training_text = training_text
 
-        text_area.grid(column=0, pady=20, padx=20)
-
-        tk.Label(text_frame, text="Autoscroll").grid(row=1, column=0)
-        checkbox = tk.Checkbutton(
+        status_text = ScrolledText(
             text_frame,
-            text="Autoscroll",
-            command=self.toggle_autoscroll,
+            wrap=tk.WORD,
+            width=100,
+            height=30,
+            font=("Terminal", 7),
+            state='normal'
         )
-        checkbox.grid(row=1, column=0)
-        checkbox.select()
+        status_text.pack(side=LEFT)
+        self.status_text = status_text
 
         status_frame = tk.Frame(main_frame)
         status_frame.grid()
@@ -154,12 +167,53 @@ class TrainingWindow:
         linux_line_endings = "\n"
         text = text.replace(windows_line_endings, linux_line_endings)
 
-        self.text_area.insert(tk.INSERT, text)
-        self.text_area.insert(tk.INSERT, "\n")
-        self.text_area.update_idletasks()
+        if self.is_status_text(text):
+            self.write_status_text(text)
+            return
+
+        self.training_text.insert(tk.INSERT, text)
+        self.training_text.insert(tk.INSERT, "\n")
+        self.training_text.update_idletasks()
         self.training_window.update_idletasks()
         if self.is_autoscroll:
-            self.text_area.see(tk.END)
+            self.training_text.see(tk.END)
+
+    def write_status_text(self, text):
+        self.status_text.insert(tk.INSERT, text)
+        self.status_text.insert(tk.INSERT, "\n")
+        self.status_text.update_idletasks()
+        self.training_window.update_idletasks()
+        if self.is_autoscroll:
+            self.status_text.see(tk.END)
+
+
+    def is_status_text(self, text) -> bool:
+        status_texts = (
+            "Generating text to output file.",
+            "Saving model",
+            "Saving model current",
+            "Updating state"
+            "Generating final text",
+            "Updating state",
+            "Pipe connection lost",
+            "Process exited",
+            "Loading project",
+            "Loading model",
+            " character sequences",
+            " texts collected.",
+            "val_loss:",
+            "All done.Ctrl+c to exit terminal."
+        )
+
+        for status_text in status_texts:
+            if status_text.strip() in text:
+                return True
+
+        if ("tensorflow/" in text):
+            return True
+
+        return False
+
 
     def is_progress_text(self, text):
         if self.is_progress_bar1(text):
