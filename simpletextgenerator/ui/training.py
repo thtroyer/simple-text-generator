@@ -5,6 +5,7 @@ import re
 import threading
 import tkinter
 import tkinter as tk
+from datetime import datetime
 from tkinter import ttk, LEFT, BOTTOM, RIGHT, TOP
 from queue import Queue
 from tkinter.scrolledtext import ScrolledText
@@ -179,7 +180,8 @@ class TrainingWindow:
             self.training_text.see(tk.END)
 
     def write_status_text(self, text):
-        self.status_text.insert(tk.INSERT, text)
+        time_string = datetime.now().strftime('%H:%M:%S')
+        self.status_text.insert(tk.INSERT, f"{time_string}: {text}")
         self.status_text.insert(tk.INSERT, "\n")
         self.status_text.update_idletasks()
         self.training_window.update_idletasks()
@@ -216,16 +218,16 @@ class TrainingWindow:
 
 
     def is_progress_text(self, text):
-        if self.is_progress_bar1(text):
+        if self.is_training_progress_bar(text):
             return True
-        if self.is_progress_bar2(text):
+        if self.is_generating_progress_bar(text):
             return True
         return False
 
-    def is_progress_bar1(self, text):
+    def is_training_progress_bar(self, text):
         return (re.search(r"\d*\/\d*\ \[[\.=>]*\]", text)) is not None
 
-    def is_progress_bar2(self, text):
+    def is_generating_progress_bar(self, text):
         match1 = (re.search(r"\d*\.\d*s/it\]$", text)) is not None
         match2 = (re.search(r"\d*\.\d*it/s\]$", text)) is not None
         return match1 or match2
@@ -236,7 +238,7 @@ class TrainingWindow:
             if pieces[0].find("[") == -1:
                 return pieces[0]
             return pieces[0].split("-")[1]
-        except:
+        except Exception as ignore:
             return ""
 
     def get_progress_text_bar2(self, text):
@@ -264,10 +266,10 @@ class TrainingWindow:
             return
 
         if self.is_progress_text(text):
-            if self.is_progress_bar1(text):
-                percentage = self.update_ui_for_progress_bar1(text)
+            if self.is_training_progress_bar(text):
+                percentage = self.update_ui_for_training_progress_bar(text)
             else:
-                percentage = self.update_ui_for_progress_bar2(text)
+                percentage = self.update_ui_from_generation_progress_bar(text)
 
             self.sub_progress["maximum"] = 100
             self.sub_progress["value"] = percentage
@@ -311,7 +313,7 @@ class TrainingWindow:
         self.loss_value_label.config(text=str(self.running_mean_loss.mean()))
         self.sub_progress_eta.config(text="Training model. " + text.split("loss: ")[0])
 
-    def update_ui_for_progress_bar2(self, text):
+    def update_ui_from_generation_progress_bar(self, text):
         percentage = self.get_percentage_bar2(text)
         eta_text = self.get_progress_text_bar2(text)
         generation_text = eta_text.split(",  ")[-1].split("]")[0]
@@ -329,19 +331,29 @@ class TrainingWindow:
         self.sub_progress_eta.config(text="Generating text. " + eta_text)
         return percentage
 
-    def update_ui_for_progress_bar1(self, text):
-        percentage = self.get_percentage_bar1(text)
-        eta_text = self.get_progress_text_bar1(text)
+
+    def get_loss_from_training_bar_output(self, text):
+        if not "loss: " in text:
+            return 0.0
+
         loss_value = text.split("loss: ")[-1]
-        if loss_value.find("\r\n"):
+        if "\r\n" in loss_value:
             loss_value = loss_value.split("\r\n")[0]
         try:
-            if loss_value != '':
-                self.running_mean_loss.add(float(loss_value))
+            return float(loss_value)
         except Exception as e:
             logger.warning(f"Unable to parse loss: {text}")
             logger.warning(e)
-        self.loss_value_label.config(text=str(self.running_mean_loss.mean()))
+            return 0.0
+
+    def update_ui_for_training_progress_bar(self, text):
+        percentage = self.get_percentage_bar1(text)
+        eta_text = self.get_progress_text_bar1(text)
+        loss = self.get_loss_from_training_bar_output(text)
+        if loss > 0:
+            self.running_mean_loss.add(loss)
+            self.loss_value_label.config(text=str(self.running_mean_loss.mean()))
+
         self.sub_progress_eta.config(text="Training model. " + eta_text)
         return percentage
 
