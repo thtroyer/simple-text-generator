@@ -9,7 +9,7 @@ from simpletextgenerator import training, jobs_util
 from simpletextgenerator.jobs_util import resource_path
 from simpletextgenerator.logging_setup import setup_logging
 
-# the following unused import is needed for pyinstaller to build correctly
+# the following unused import is needed for pyinstaller to create builds correctly
 import sklearn.utils._weight_vector
 
 # Helps prevent a crash I was getting.  #todo evaluate
