@@ -49,7 +49,7 @@ class Train:
 
     def run(self):
         log_file_name = "logs/simple-text-generator_training.log"
-        previous_log_file_name = "logs/simple-text-generator_training.log"
+        previous_log_file_name = "logs/simple-text-generator_training_previous.log"
         setup_logging(self.logger, log_file_name, previous_log_file_name)
 
         self.logger.info("Loading project " + self.job.config.job_name)
