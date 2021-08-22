@@ -12,9 +12,10 @@ from tkinter.scrolledtext import ScrolledText
 
 import logging
 
-from simpletextgenerator.utility.RunningMean import RunningMean
+from simpletextgenerator.utility.running_mean import RunningMean
 
 logger = logging.getLogger("ui")
+
 
 # TODO
 # - new layout
@@ -24,7 +25,6 @@ logger = logging.getLogger("ui")
 
 def create_training_window():
     TrainingRunner().begin_work()
-
 
 
 class TrainingRunner:
@@ -75,7 +75,6 @@ class TrainingWindow:
         self.running_mean_loss = RunningMean(10)
         self.running_mean_generation = RunningMean(100)
 
-
     def toggle_autoscroll(self):
         self.is_autoscroll = not self.is_autoscroll
 
@@ -100,7 +99,6 @@ class TrainingWindow:
         )
         checkbox.pack(side=LEFT, anchor=tkinter.NE, padx=500, pady=3)
         checkbox.select()
-
 
         text_frame = tk.Frame(main_frame)
         training_text = ScrolledText(
@@ -188,7 +186,6 @@ class TrainingWindow:
         if self.is_autoscroll:
             self.status_text.see(tk.END)
 
-
     def is_status_text(self, text) -> bool:
         status_texts = (
             "Generating text to output file.",
@@ -215,7 +212,6 @@ class TrainingWindow:
             return True
 
         return False
-
 
     def is_progress_text(self, text):
         if self.is_training_progress_bar(text):
@@ -254,7 +250,6 @@ class TrainingWindow:
     def process_text(self, text: str, type: str):
         # cleaning up some garbage characters
         text = str.replace(text, '\b', '')
-
 
         # most of this data in unnecessary to log
         # if type == "stderr":
@@ -331,9 +326,8 @@ class TrainingWindow:
         self.sub_progress_eta.config(text="Generating text. " + eta_text)
         return percentage
 
-
     def get_loss_from_training_bar_output(self, text):
-        if not "loss: " in text:
+        if "loss: " not in text:
             return 0.0
 
         loss_value = text.split("loss: ")[-1]

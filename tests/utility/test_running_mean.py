@@ -1,4 +1,4 @@
-from simpletextgenerator.utility.RunningMean import RunningMean
+from simpletextgenerator.utility.running_mean import RunningMean
 
 
 def test_3_average():
