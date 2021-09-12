@@ -2,7 +2,7 @@ import subprocess
 import tkinter as tk
 from warnings import showwarning
 
-from simpletextgenerator.ui import new_job, edit_job, training, archive_delete
+from simpletextgenerator.ui import new_job, edit_job, training, archive_delete, generating_only_job
 
 import logging
 
@@ -13,7 +13,7 @@ class MenuWindow:
     def draw_main_window(self):
         main_window = tk.Tk()
         main_window.title('simple-text-generator')
-        main_window.geometry("300x220")
+        main_window.geometry("300x300")
         main_frame = tk.Frame(main_window)
         main_frame.pack()
         tk.Button(
@@ -34,6 +34,20 @@ class MenuWindow:
             main_frame,
             text='Create new job, using another model',
             command=new_job.draw_new_job_load_model_window,
+            width=35
+        ).pack()
+
+        tk.Button(
+            main_frame,
+            text='Generate text from model',
+            command=generating_only_job.draw_generation_job_window,
+            width=35
+        ).pack()
+
+        tk.Button(
+            main_frame,
+            text='Generate text from multiple models (batch)',
+            command=generating_only_job.draw_generation_batch_job_window,
             width=35
         ).pack()
 
