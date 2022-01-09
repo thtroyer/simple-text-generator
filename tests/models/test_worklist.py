@@ -16,10 +16,11 @@ def test_generatingWorkItem():
 
 
 def test_Worklist_get_time_estimate():
-    workList = WorkList((
-        GeneratingWorkItem(50),
-        TrainingWorkItem(200)
-    ))
+    workList = WorkList(
+        (
+            GeneratingWorkItem(50), TrainingWorkItem(200)
+        )
+    )
     workList.set_training_rate(2)
     workList.set_generating_rate(1)
 
@@ -27,10 +28,12 @@ def test_Worklist_get_time_estimate():
 
 
 def test_Worklist_get_time_estimate_progress():
-    workList = WorkList((
-        TrainingWorkItem(200),
-        GeneratingWorkItem(50)
-    ))
+    workList = WorkList(
+        (
+            TrainingWorkItem(200),
+            GeneratingWorkItem(50)
+        )
+    )
     workList.set_training_rate(2)
     workList.set_generating_rate(1)
 
@@ -46,12 +49,15 @@ def test_Worklist_get_time_estimate_progress():
 
 
 def test_Worklist_advance_index():
-    workList = WorkList((
-        GeneratingWorkItem(50),
-        GeneratingWorkItem(50),
-        TrainingWorkItem(100),
-        TrainingWorkItem(100)
-    ))
+    workList = WorkList(
+        (
+            GeneratingWorkItem(50),
+            GeneratingWorkItem(50),
+            TrainingWorkItem(100),
+            TrainingWorkItem(100)
+        )
+    )
+
     workList.set_training_rate(1)
     workList.set_generating_rate(1)
 

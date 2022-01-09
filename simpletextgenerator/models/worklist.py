@@ -1,9 +1,31 @@
 import abc
-from typing import List, Tuple
+from typing import Tuple
+
+
+class WorkItem:
+    """
+    Interface for the 2 classes below
+    """
+    def __init__(self, items_to_complete: int):
+        self._items_to_complete = items_to_complete
+
+    @abc.abstractmethod
+    def get_time_estimate(self, generation_rate: float = 0.0, training_rate: float = 0.0):
+        pass
+
+
+class TrainingWorkItem(WorkItem):
+    def get_time_estimate(self, generation_rate: float = 0.0, training_rate: float = 0.0):
+        return self._items_to_complete / training_rate
+
+
+class GeneratingWorkItem(WorkItem):
+    def get_time_estimate(self, generation_rate: float = 0.0, training_rate: float = 0.0):
+        return self._items_to_complete / generation_rate
 
 
 class WorkList:
-    def __init__(self, items_to_complete: Tuple):
+    def __init__(self, items_to_complete: Tuple[WorkItem, ...]):
         self._progress_current_task = 0
         self._items_to_complete = items_to_complete
         self._current_item_index = 0
@@ -33,22 +55,3 @@ class WorkList:
 
     def set_progress_on_current_work_item(self, progress: float):
         self._progress_current_task = progress
-
-
-class WorkItem:
-    def __init__(self, items_to_complete: int):
-        self._items_to_complete = items_to_complete
-
-    @abc.abstractmethod
-    def get_time_estimate(self, generation_rate: float = 0.0, training_rate: float = 0.0):
-        pass
-
-
-class TrainingWorkItem(WorkItem):
-    def get_time_estimate(self, generation_rate: float = 0.0, training_rate: float = 0.0):
-        return self._items_to_complete / training_rate
-
-
-class GeneratingWorkItem(WorkItem):
-    def get_time_estimate(self, generation_rate: float = 0.0, training_rate: float = 0.0):
-        return self._items_to_complete / generation_rate
