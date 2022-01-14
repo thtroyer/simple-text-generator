@@ -18,107 +18,37 @@ logger = logging.getLogger("ui")
 
 def draw_new_job_window():
     new_job_window = NewJobWindow()
-    new_job_window.draw_new_job_window()
+    new_job_window.mainloop()
 
 
 def draw_new_job_load_model_window():
-    new_job_window = NewJobWindow()
-    new_job_window.draw_new_job_load_model_window()
+    new_job_window = NewJobWindowLoad()
+    new_job_window.mainloop()
 
 
 def draw_new_batch_job_window():
-    new_batch_job_window = NewJobWindow()
-    new_batch_job_window.draw_new_batch_job_window()
+    new_batch_job_window = NewJobWindowBatch()
+    new_batch_job_window.mainloop()
 
 
-class NewJobWindow:
+class AbstractNewJobWindow(tk.Tk):
 
     def __init__(self):
-        self.new_job_window = None
+        super().__init__()
+        self.button_open_model_file = None
+        self.button_open_training_file = None
         self.new_batch_job_window = None
-        self.new_job_load_model_window = None
-
+        self.training_data_percent = None
+        self.dropout = None
+        self.save_frequency = None
+        self.generation_frequency = None
+        self.items_to_generate_at_end = None
+        self.items_to_generate_between_generations = None
+        self.temperatures_to_generate = None
         self.number_of_iterations = None
         self.project_name = None
-        self.dropout = None
-        self.temperatures_to_generate = None
-        self.items_to_generate_between_generations = None
-        self.training_data_percent = None
-        self.generation_frequency = None
-        self.save_frequency = None
-        self.items_to_generate_at_end = None
-        self.button_open_training_file = None
-        self.button_open_model_file = None
-        self.training_file = None
-        self.batch_training_files = None
-        self.training_file_origin_path = None
-        self.model_to_load = None
-        self.model_to_load_origin_path = None
-
-    def draw_new_job_window(self):
-        if self.new_job_window is not None:
-            self.new_job_window = None
-
-        new_job_window = tk.Tk()
-        new_job_window.title("Create New Job - simple-text-generator")
-        main_frame = tk.Frame(new_job_window)
-        main_frame.grid()
-        top_frame = tk.Frame(main_frame)
-        bottom_frame = tk.Frame(main_frame)
-        tk.Label(top_frame, text="Project Name:").grid(row=0, column=0)
-        self.project_name = tk.Entry(top_frame)
-        self.project_name.grid(row=0, column=1)
-
-        tk.Button(bottom_frame, text='Cancel', command=self.back_new_job_window).grid(row=0, column=0)
-        tk.Button(bottom_frame, text='Save New Job', command=self.save_new_job_window).grid(row=0, column=1)
-        bottom_frame.grid()
-        self.new_job_window = new_job_window
-
-        model_frame = tk.Frame(main_frame, relief="raised", borderwidth=3)
-        model_frame.grid(row=1, column=0)
-        tk.Label(model_frame, text="Training file").grid(row=0, column=0, sticky='e')
-        self.button_open_training_file = tk.Button(model_frame, text="Select a file",
-                                                   command=self.set_training_file)
-        self.button_open_training_file.grid(row=0, column=1)
-
-        tk.Label(model_frame, text="Number of iterations:").grid(row=1, column=0, sticky='e')
-        self.number_of_iterations = tk.Entry(model_frame)
-        self.number_of_iterations.grid(row=1, column=1)
-        tk.Label(model_frame, text="Dropout (keep low, ~0-0.2):").grid(row=2, sticky='e')
-        self.dropout = tk.Entry(model_frame)
-        self.dropout.grid(row=2, column=1)
-        tk.Label(model_frame, text="Training Data Percent, 0-1.0):").grid(row=3, sticky='e')
-        self.training_data_percent = tk.Entry(model_frame)
-        self.training_data_percent.grid(row=3, column=1)
-        tk.Label(model_frame, text="Temperatures to generate:").grid(row=4, sticky='e')
-        self.temperatures_to_generate = tk.Entry(model_frame)
-        self.temperatures_to_generate.grid(row=4, column=1)
-        tk.Label(model_frame, text="Items to generate between generations:").grid(row=5, sticky='e')
-        self.items_to_generate_between_generations = tk.Entry(model_frame)
-        self.items_to_generate_between_generations.grid(row=5, column=1)
-        tk.Label(model_frame, text="Generate every _ generations:").grid(row=6, sticky='e')
-        self.generation_frequency = tk.Entry(model_frame)
-        self.generation_frequency.grid(row=6, column=1)
-        tk.Label(model_frame, text="Save model every _ generations:").grid(row=7, sticky='e')
-        self.save_frequency = tk.Entry(model_frame)
-        self.save_frequency.grid(row=7, column=1)
-        tk.Label(model_frame, text="Items to generate at end:").grid(row=8, sticky='e')
-        self.items_to_generate_at_end = tk.Entry(model_frame)
-        self.items_to_generate_at_end.grid(row=8, column=1)
-
-        # Set some sane defaults:
-        self.number_of_iterations.insert(tk.END, 5)
-        self.dropout.insert(tk.END, 0)
-        self.temperatures_to_generate.insert(tk.END, "0.5, 1.0, 1.25")
-        self.items_to_generate_between_generations.insert(tk.END, 50)
-        self.training_data_percent.insert(tk.END, "0.75")
-        self.generation_frequency.insert(tk.END, 1)
-        self.save_frequency.insert(tk.END, 2)
-        self.items_to_generate_at_end.insert(tk.END, 500)
-
-        top_frame.grid(row=0, column=0)
-        model_frame.grid(row=1, column=0)
-        bottom_frame.grid(row=3, column=0)
+        self.new_job_window = None
+        self.new_job_load_model_window = None
 
     def back_new_job_window(self):
         self.new_job_window.destroy()
@@ -138,76 +68,6 @@ class NewJobWindow:
             # todo remove
             logger.error(e)
             raise e
-
-    def draw_new_job_load_model_window(self):
-        if self.new_job_load_model_window is not None:
-            self.new_job_load_model_window = None
-
-        new_job_load_model_window = tk.Tk()
-        self.new_job_load_model_window = new_job_load_model_window
-        new_job_load_model_window.title("Create New Job, Load Model - simple-text-generator")
-        main_frame = tk.Frame(new_job_load_model_window)
-        main_frame.grid()
-        top_frame = tk.Frame(main_frame)
-        bottom_frame = tk.Frame(main_frame)
-        tk.Label(top_frame, text="Project Name:").grid(row=0, column=0)
-        self.project_name = tk.Entry(top_frame)
-        self.project_name.grid(row=0, column=1)
-
-        tk.Button(bottom_frame, text='Cancel', command=self.back_new_job_load_model_window).grid(row=0, column=0)
-        tk.Button(bottom_frame, text='Save New Job', command=self.save_new_job_load_model_window).grid(row=0, column=1)
-        bottom_frame.grid()
-
-        model_frame = tk.Frame(main_frame, relief="raised", borderwidth=3)
-        model_frame.grid(row=1, column=0)
-        tk.Label(model_frame, text="Training file").grid(row=0, column=0, sticky='e')
-        self.button_open_training_file = tk.Button(model_frame, text="Select a file",
-                                                   command=self.set_training_file)
-        self.button_open_training_file.grid(row=0, column=1)
-
-        tk.Label(model_frame, text="Model file").grid(row=1, column=0, sticky='e')
-        self.button_open_model_file = tk.Button(model_frame, text="Select a model file (.hdf5)",
-                                                command=self.set_model_file)
-        self.button_open_model_file.grid(row=1, column=1)
-
-        tk.Label(model_frame, text="Number of iterations:").grid(row=2, column=0, sticky='e')
-        self.number_of_iterations = tk.Entry(model_frame)
-        self.number_of_iterations.grid(row=2, column=1)
-        tk.Label(model_frame, text="Dropout (keep low, ~0-0.2):").grid(row=3, sticky='e')
-        self.dropout = tk.Entry(model_frame)
-        self.dropout.grid(row=3, column=1)
-        tk.Label(model_frame, text="Training Data Percent, 0-1.0):").grid(row=4, sticky='e')
-        self.training_data_percent = tk.Entry(model_frame)
-        self.training_data_percent.grid(row=4, column=1)
-        tk.Label(model_frame, text="Temperatures to generate:").grid(row=5, sticky='e')
-        self.temperatures_to_generate = tk.Entry(model_frame)
-        self.temperatures_to_generate.grid(row=5, column=1)
-        tk.Label(model_frame, text="Items to generate between generations:").grid(row=6, sticky='e')
-        self.items_to_generate_between_generations = tk.Entry(model_frame)
-        self.items_to_generate_between_generations.grid(row=6, column=1)
-        tk.Label(model_frame, text="Generate every _ generations:").grid(row=7, sticky='e')
-        self.generation_frequency = tk.Entry(model_frame)
-        self.generation_frequency.grid(row=7, column=1)
-        tk.Label(model_frame, text="Save model every _ generations:").grid(row=8, sticky='e')
-        self.save_frequency = tk.Entry(model_frame)
-        self.save_frequency.grid(row=8, column=1)
-        tk.Label(model_frame, text="Items to generate at end:").grid(row=9, sticky='e')
-        self.items_to_generate_at_end = tk.Entry(model_frame)
-        self.items_to_generate_at_end.grid(row=9, column=1)
-
-        # Set some sane defaults:
-        self.number_of_iterations.insert(tk.END, 5)
-        self.dropout.insert(tk.END, 0)
-        self.temperatures_to_generate.insert(tk.END, "0.5, 1.0, 1.25")
-        self.items_to_generate_between_generations.insert(tk.END, 50)
-        self.training_data_percent.insert(tk.END, "0.75")
-        self.generation_frequency.insert(tk.END, 1)
-        self.save_frequency.insert(tk.END, 2)
-        self.items_to_generate_at_end.insert(tk.END, 500)
-
-        top_frame.grid(row=0, column=0)
-        model_frame.grid(row=1, column=0)
-        bottom_frame.grid(row=3, column=0)
 
     @staticmethod
     def create_new_project_dir(path):
@@ -326,13 +186,155 @@ class NewJobWindow:
             logger.error(e)
             raise e
 
-    def draw_new_batch_job_window(self):
+    def set_training_file_batch(self):
+        self.batch_training_files = tk.filedialog.askopenfilenames(title='Choose a file')
+        self.new_job_window.lift()
+
+
+class NewJobWindow(AbstractNewJobWindow):
+    def __init__(self):
+        super().__init__()
+
+        self.title("Create New Job - simple-text-generator")
+        main_frame = tk.Frame(self)
+        main_frame.grid()
+        top_frame = tk.Frame(main_frame)
+        bottom_frame = tk.Frame(main_frame)
+        tk.Label(top_frame, text="Project Name:").grid(row=0, column=0)
+        self.project_name = tk.Entry(top_frame)
+        self.project_name.grid(row=0, column=1)
+
+        tk.Button(bottom_frame, text='Cancel', command=self.back_new_job_window).grid(row=0, column=0)
+        tk.Button(bottom_frame, text='Save New Job', command=self.save_new_job_window).grid(row=0, column=1)
+        bottom_frame.grid()
+        self.new_job_window = self
+
+        model_frame = tk.Frame(main_frame, relief="raised", borderwidth=3)
+        model_frame.grid(row=1, column=0)
+        tk.Label(model_frame, text="Training file").grid(row=0, column=0, sticky='e')
+        self.button_open_training_file = tk.Button(model_frame, text="Select a file",
+                                                   command=self.set_training_file)
+        self.button_open_training_file.grid(row=0, column=1)
+
+        tk.Label(model_frame, text="Number of iterations:").grid(row=1, column=0, sticky='e')
+        self.number_of_iterations = tk.Entry(model_frame)
+        self.number_of_iterations.grid(row=1, column=1)
+        tk.Label(model_frame, text="Dropout (keep low, ~0-0.2):").grid(row=2, sticky='e')
+        self.dropout = tk.Entry(model_frame)
+        self.dropout.grid(row=2, column=1)
+        tk.Label(model_frame, text="Training Data Percent, 0-1.0):").grid(row=3, sticky='e')
+        self.training_data_percent = tk.Entry(model_frame)
+        self.training_data_percent.grid(row=3, column=1)
+        tk.Label(model_frame, text="Temperatures to generate:").grid(row=4, sticky='e')
+        self.temperatures_to_generate = tk.Entry(model_frame)
+        self.temperatures_to_generate.grid(row=4, column=1)
+        tk.Label(model_frame, text="Items to generate between generations:").grid(row=5, sticky='e')
+        self.items_to_generate_between_generations = tk.Entry(model_frame)
+        self.items_to_generate_between_generations.grid(row=5, column=1)
+        tk.Label(model_frame, text="Generate every _ generations:").grid(row=6, sticky='e')
+        self.generation_frequency = tk.Entry(model_frame)
+        self.generation_frequency.grid(row=6, column=1)
+        tk.Label(model_frame, text="Save model every _ generations:").grid(row=7, sticky='e')
+        self.save_frequency = tk.Entry(model_frame)
+        self.save_frequency.grid(row=7, column=1)
+        tk.Label(model_frame, text="Items to generate at end:").grid(row=8, sticky='e')
+        self.items_to_generate_at_end = tk.Entry(model_frame)
+        self.items_to_generate_at_end.grid(row=8, column=1)
+
+        # Set some sane defaults:
+        self.number_of_iterations.insert(tk.END, "5")
+        self.dropout.insert(tk.END, "0")
+        self.temperatures_to_generate.insert(tk.END, "0.5, 1.0, 1.25")
+        self.items_to_generate_between_generations.insert(tk.END, "50")
+        self.training_data_percent.insert(tk.END, "0.75")
+        self.generation_frequency.insert(tk.END, "1")
+        self.save_frequency.insert(tk.END, "2")
+        self.items_to_generate_at_end.insert(tk.END, "500")
+
+        top_frame.grid(row=0, column=0)
+        model_frame.grid(row=1, column=0)
+        bottom_frame.grid(row=3, column=0)
+
+
+class NewJobWindowLoad(AbstractNewJobWindow):
+    def __init__(self):
+        super().__init__()
+
+        self.new_job_load_model_window = self
+        self.title("Create New Job, Load Model - simple-text-generator")
+        main_frame = tk.Frame(self)
+        main_frame.grid()
+        top_frame = tk.Frame(main_frame)
+        bottom_frame = tk.Frame(main_frame)
+        tk.Label(top_frame, text="Project Name:").grid(row=0, column=0)
+        self.project_name = tk.Entry(top_frame)
+        self.project_name.grid(row=0, column=1)
+
+        tk.Button(bottom_frame, text='Cancel', command=self.back_new_job_load_model_window).grid(row=0, column=0)
+        tk.Button(bottom_frame, text='Save New Job', command=self.save_new_job_load_model_window).grid(row=0, column=1)
+        bottom_frame.grid()
+
+        model_frame = tk.Frame(main_frame, relief="raised", borderwidth=3)
+        model_frame.grid(row=1, column=0)
+        tk.Label(model_frame, text="Training file").grid(row=0, column=0, sticky='e')
+        self.button_open_training_file = tk.Button(model_frame, text="Select a file",
+                                                   command=self.set_training_file)
+        self.button_open_training_file.grid(row=0, column=1)
+
+        tk.Label(model_frame, text="Model file").grid(row=1, column=0, sticky='e')
+        self.button_open_model_file = tk.Button(model_frame, text="Select a model file (.hdf5)",
+                                                command=self.set_model_file)
+        self.button_open_model_file.grid(row=1, column=1)
+
+        tk.Label(model_frame, text="Number of iterations:").grid(row=2, column=0, sticky='e')
+        self.number_of_iterations = tk.Entry(model_frame)
+        self.number_of_iterations.grid(row=2, column=1)
+        tk.Label(model_frame, text="Dropout (keep low, ~0-0.2):").grid(row=3, sticky='e')
+        self.dropout = tk.Entry(model_frame)
+        self.dropout.grid(row=3, column=1)
+        tk.Label(model_frame, text="Training Data Percent, 0-1.0):").grid(row=4, sticky='e')
+        self.training_data_percent = tk.Entry(model_frame)
+        self.training_data_percent.grid(row=4, column=1)
+        tk.Label(model_frame, text="Temperatures to generate:").grid(row=5, sticky='e')
+        self.temperatures_to_generate = tk.Entry(model_frame)
+        self.temperatures_to_generate.grid(row=5, column=1)
+        tk.Label(model_frame, text="Items to generate between generations:").grid(row=6, sticky='e')
+        self.items_to_generate_between_generations = tk.Entry(model_frame)
+        self.items_to_generate_between_generations.grid(row=6, column=1)
+        tk.Label(model_frame, text="Generate every _ generations:").grid(row=7, sticky='e')
+        self.generation_frequency = tk.Entry(model_frame)
+        self.generation_frequency.grid(row=7, column=1)
+        tk.Label(model_frame, text="Save model every _ generations:").grid(row=8, sticky='e')
+        self.save_frequency = tk.Entry(model_frame)
+        self.save_frequency.grid(row=8, column=1)
+        tk.Label(model_frame, text="Items to generate at end:").grid(row=9, sticky='e')
+        self.items_to_generate_at_end = tk.Entry(model_frame)
+        self.items_to_generate_at_end.grid(row=9, column=1)
+
+        # Set some sane defaults:
+        self.number_of_iterations.insert(tk.END, "5")
+        self.dropout.insert(tk.END, "0")
+        self.temperatures_to_generate.insert(tk.END, "0.5, 1.0, 1.25")
+        self.items_to_generate_between_generations.insert(tk.END, "50")
+        self.training_data_percent.insert(tk.END, "0.75")
+        self.generation_frequency.insert(tk.END, "1")
+        self.save_frequency.insert(tk.END, "2")
+        self.items_to_generate_at_end.insert(tk.END, "500")
+
+        top_frame.grid(row=0, column=0)
+        model_frame.grid(row=1, column=0)
+        bottom_frame.grid(row=3, column=0)
+
+
+class NewJobWindowBatch(AbstractNewJobWindow):
+    def __init__(self):
+        super().__init__()
+
         if self.new_batch_job_window is not None:
             self.new_batch_job_window = None
 
-        new_job_window = tk.Tk()
-        new_job_window.title("Create New Batch Jobs - simple-text-generator")
-        main_frame = tk.Frame(new_job_window)
+        self.title("Create New Batch Jobs - simple-text-generator")
+        main_frame = tk.Frame(self)
         main_frame.grid()
         top_frame = tk.Frame(main_frame)
         bottom_frame = tk.Frame(main_frame)
@@ -340,7 +342,7 @@ class NewJobWindow:
         tk.Button(bottom_frame, text='Cancel', command=self.back_new_job_window).grid(row=0, column=0)
         tk.Button(bottom_frame, text='Save New Job', command=self.save_new_batch_job_window).grid(row=0, column=1)
         bottom_frame.grid()
-        self.new_job_window = new_job_window
+        self.new_job_window = self
 
         model_frame = tk.Frame(main_frame, relief="raised", borderwidth=3)
         model_frame.grid(row=1, column=0)
@@ -375,19 +377,15 @@ class NewJobWindow:
         self.items_to_generate_at_end.grid(row=8, column=1)
 
         # Set some sane defaults:
-        self.number_of_iterations.insert(tk.END, 5)
-        self.dropout.insert(tk.END, 0)
+        self.number_of_iterations.insert(tk.END, "5")
+        self.dropout.insert(tk.END, "0")
         self.temperatures_to_generate.insert(tk.END, "0.5, 1.0, 1.25")
-        self.items_to_generate_between_generations.insert(tk.END, 50)
+        self.items_to_generate_between_generations.insert(tk.END, "50")
         self.training_data_percent.insert(tk.END, "0.75")
-        self.generation_frequency.insert(tk.END, 1)
-        self.save_frequency.insert(tk.END, 2)
-        self.items_to_generate_at_end.insert(tk.END, 500)
+        self.generation_frequency.insert(tk.END, "1")
+        self.save_frequency.insert(tk.END, "2")
+        self.items_to_generate_at_end.insert(tk.END, "500")
 
         top_frame.grid(row=0, column=0)
         model_frame.grid(row=1, column=0)
         bottom_frame.grid(row=3, column=0)
-
-    def set_training_file_batch(self):
-        self.batch_training_files = tk.filedialog.askopenfilenames(title='Choose a file')
-        self.new_job_window.lift()
