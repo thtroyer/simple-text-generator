@@ -6,7 +6,7 @@ name = "pypi"
 [packages]
 textgenrnn = {ref = "ee8b9e806d109c25566581f358a4a72b6f03929a", git = "git://github.com/minimaxir/textgenrnn"}
 #textgenrnn = {ref = "master", git = "git://github.com/minimaxir/textgenrnn"}
-tensorflow = "==2.4.2" # unable to resolve keras at 2.5.0 currently
+tensorflow = "==2.5.3" # unable to resolve keras at 2.5.0 currently
 chevron = "*"
 PyYAML = "*"
 pipfile = "*"
