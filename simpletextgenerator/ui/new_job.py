@@ -49,6 +49,7 @@ class AbstractNewJobWindow(tk.Tk):
         self.project_name = None
         self.new_job_window = None
         self.new_job_load_model_window = None
+        self.model_to_load = None
 
     def back_new_job_window(self):
         self.new_job_window.destroy()
