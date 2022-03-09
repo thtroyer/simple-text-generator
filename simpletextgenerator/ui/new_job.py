@@ -32,6 +32,7 @@ def draw_new_batch_job_window():
 
 
 class AbstractNewJobWindow(tk.Tk):
+    """Parent class for the 3 related UIs in this file."""
 
     def __init__(self):
         super().__init__()
@@ -193,6 +194,8 @@ class AbstractNewJobWindow(tk.Tk):
 
 
 class NewJobWindow(AbstractNewJobWindow):
+    """UI for completely new jobs."""
+
     def __init__(self):
         super().__init__()
 
@@ -258,6 +261,8 @@ class NewJobWindow(AbstractNewJobWindow):
 
 
 class NewJobWindowLoad(AbstractNewJobWindow):
+    """UI for new jobs, but continuing from an existing model."""
+
     def __init__(self):
         super().__init__()
 
@@ -328,6 +333,8 @@ class NewJobWindowLoad(AbstractNewJobWindow):
 
 
 class NewJobWindowBatch(AbstractNewJobWindow):
+    """UI for new jobs, set up as a batch."""
+
     def __init__(self):
         super().__init__()
 
