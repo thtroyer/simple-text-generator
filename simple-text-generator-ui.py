@@ -1,9 +1,9 @@
 import hashlib
 import logging
+import os
 import pathlib
 import subprocess
 import sys
-import os
 
 from simpletextgenerator.logging_setup import setup_logging
 from simpletextgenerator.ui.menu import draw_main_menu

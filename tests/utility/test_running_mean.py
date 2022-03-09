@@ -10,6 +10,7 @@ def test_3_average():
 
     assert running_mean.mean() == 2
 
+
 def test_10_average():
     running_mean = RunningMean(10)
 

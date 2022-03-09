@@ -1,6 +1,6 @@
-from simpletextgenerator.models import config, state
-
 import logging
+
+from simpletextgenerator.models import config, state
 
 logger = logging.getLogger("ui")
 

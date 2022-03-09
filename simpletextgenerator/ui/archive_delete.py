@@ -1,8 +1,7 @@
+import logging
 import os
 import shutil
 import tkinter as tk
-
-import logging
 from tkinter.messagebox import askyesno
 
 logger = logging.getLogger("ui")
@@ -40,7 +39,8 @@ class ArchiveDeleteWindow:
     def archive_project(self):
         if self.selected_project_name.get() == '' or self.selected_project_name.get() == 'Select a project':
             return
-        shutil.move(f"projects/{self.selected_project_name.get()}", f"projects/archive/{self.selected_project_name.get()}")
+        shutil.move(f"projects/{self.selected_project_name.get()}",
+                    f"projects/archive/{self.selected_project_name.get()}")
         self.selected_project_name.set("Select a project")
         self.destroy_window()
 
@@ -53,7 +53,6 @@ class ArchiveDeleteWindow:
             self.destroy_window()
             return
         self.archive_delete_window.lift()
-
 
     def draw_archive_delete_window(self):
         if self.archive_delete_window is not None:

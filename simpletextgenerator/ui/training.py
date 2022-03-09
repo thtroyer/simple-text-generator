@@ -1,16 +1,15 @@
 import asyncio
 import contextlib
+import logging
 import os
 import re
 import threading
 import tkinter
 import tkinter as tk
 from datetime import datetime
-from tkinter import ttk, LEFT, BOTTOM, RIGHT, TOP
 from queue import Queue
+from tkinter import ttk, LEFT
 from tkinter.scrolledtext import ScrolledText
-
-import logging
 
 from simpletextgenerator.utility.running_mean import RunningMean
 

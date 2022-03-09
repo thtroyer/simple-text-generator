@@ -20,4 +20,3 @@ def test_get_percentage_bar2():
     training_window = TrainingWindow(None, None, None)
     result = training_window.get_percentage_bar2("80%|████████  | 4/5 [00:13<00:03,  3.12it/s]")
     assert result == "80"
-

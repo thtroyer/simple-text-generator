@@ -2,8 +2,9 @@ import logging
 import os
 import pathlib
 import shutil
-import tensorflow
 import sys
+
+import tensorflow
 
 from simpletextgenerator import training, jobs_util
 from simpletextgenerator.jobs_util import resource_path
@@ -18,7 +19,6 @@ try:
     tensorflow.config.experimental.set_memory_growth(gpus[0], True)
 except IndexError as ignored:
     pass
-
 
 project_dir = "./projects"
 to_run_dir = "to_run"

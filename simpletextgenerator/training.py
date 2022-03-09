@@ -1,12 +1,11 @@
-import logging
 import os
 
 from textgenrnn import textgenrnn
+
 from simpletextgenerator.jobs_util import resource_path
 from simpletextgenerator.logging_setup import setup_logging
 from simpletextgenerator.models.job import Job
 from simpletextgenerator.training_status import TrainingStatus
-
 
 
 class Train:
@@ -85,7 +84,8 @@ class Train:
     def generate_final_text(self):
         self.logger.info("Generating final text")
         for temperature in self.job.config.temperatures_to_generate:
-            generated = self.textgen.generate(n=self.job.config.items_to_generate_at_end, return_as_list=True, temperature=temperature)
+            generated = self.textgen.generate(n=self.job.config.items_to_generate_at_end, return_as_list=True,
+                                              temperature=temperature)
             self.save_lines_to_file("last", temperature, generated)
 
     def save_model(self, model_name: str) -> None:
@@ -109,7 +109,8 @@ class Train:
             if (i % self.job.config.generate_every_n_generations) == 0:
                 for temperature in self.job.config.temperatures_to_generate:
                     try:
-                        generated = self.textgen.generate(n=self.job.config.items_to_generate_each_generation, return_as_list=True, temperature=temperature)
+                        generated = self.textgen.generate(n=self.job.config.items_to_generate_each_generation,
+                                                          return_as_list=True, temperature=temperature)
                     except KeyError:
                         continue
                     self.save_lines_to_file(i * self.job.config.generate_every_n_generations, temperature, generated)

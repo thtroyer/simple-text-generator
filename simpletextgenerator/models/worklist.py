@@ -6,6 +6,7 @@ class WorkItem:
     """
     Interface for the 2 classes below
     """
+
     def __init__(self, items_to_complete: int):
         self._items_to_complete = items_to_complete
 

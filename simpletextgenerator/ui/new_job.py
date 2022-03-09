@@ -1,17 +1,17 @@
+import logging
 import os
-import chevron
 import tkinter as tk
-from tkinter import filedialog
-from pathlib import Path
 from os.path import splitext
-from tkinter import messagebox
+from pathlib import Path
 from shutil import copyfile
+from tkinter import filedialog
+from tkinter import messagebox
+
+import chevron
 
 from simpletextgenerator.jobs_util import resource_path
 from simpletextgenerator.models.config import Config
 from simpletextgenerator.training_status import TrainingStatus
-
-import logging
 
 logger = logging.getLogger("ui")
 

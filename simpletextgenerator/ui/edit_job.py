@@ -1,15 +1,18 @@
+import logging
 import os
+import tkinter as tk
+from pathlib import Path
 from shutil import copyfile
 from tkinter import filedialog
-import tkinter as tk
+
 import chevron
-from pathlib import Path
+
 from simpletextgenerator.jobs_util import create_job, resource_path
 from simpletextgenerator.models.config import Config
 from simpletextgenerator.training_status import TrainingStatus
 
-import logging
 logger = logging.getLogger("ui")
+
 
 def draw_edit_existing_job_window():
     edit_existing_job_window = EditJobWindow()

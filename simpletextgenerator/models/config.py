@@ -1,8 +1,8 @@
+import logging
 from dataclasses import dataclass
 from typing import IO
-import chevron
 
-import logging
+import chevron
 
 logger = logging.getLogger("ui")
 

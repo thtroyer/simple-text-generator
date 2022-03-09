@@ -1,8 +1,7 @@
+import logging
 import tkinter as tk
 
 from simpletextgenerator.ui import new_job, edit_job, training, archive_delete, generating_only_job
-
-import logging
 
 logger = logging.getLogger("ui")
 
