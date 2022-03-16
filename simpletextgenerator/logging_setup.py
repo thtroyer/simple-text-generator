@@ -3,16 +3,10 @@ import os
 import sys
 
 
-def archive_last_log(log_file_name, previous_log_file_name):
-    if os.path.exists(log_file_name):
-        if os.path.exists(previous_log_file_name):
-            os.remove(previous_log_file_name)
-        os.rename(log_file_name, previous_log_file_name)
-
-
 def setup_logging(logger, log_file_name, previous_log_file_name, level=logging.DEBUG):
+    """Configures passed in logger and handles archiving previous log file."""
     logger.setLevel(level)
-    archive_last_log(log_file_name, previous_log_file_name)
+    _archive_last_log(log_file_name, previous_log_file_name)
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     logger.setLevel(level)
     stdout_handler = logging.StreamHandler(stream=sys.stdout)
@@ -23,3 +17,10 @@ def setup_logging(logger, log_file_name, previous_log_file_name, level=logging.D
     logger.addHandler(file_handler)
 
     return logger
+
+
+def _archive_last_log(log_file_name, previous_log_file_name):
+    if os.path.exists(log_file_name):
+        if os.path.exists(previous_log_file_name):
+            os.remove(previous_log_file_name)
+        os.rename(log_file_name, previous_log_file_name)

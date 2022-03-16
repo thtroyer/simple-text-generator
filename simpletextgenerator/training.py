@@ -9,6 +9,10 @@ from simpletextgenerator.training_status import TrainingStatus
 
 
 class Train:
+    """
+    Manages the training and text generation steps.  Contains the state of the project/job
+    and interfaces with textgenrnn library to execute the training/generation.
+    """
     def __init__(self, job: Job, logger):
         self.logger = logger
         self.job = job
