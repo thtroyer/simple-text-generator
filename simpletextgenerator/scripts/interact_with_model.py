@@ -16,7 +16,7 @@ class InteractiveTextGen:
 
 
 if __name__ == "__main__":
-    interactive = InteractiveTextGen('./interactive_model.hdf5aa')
+    interactive = InteractiveTextGen(os.path.abspath('./interactive_model.hdf5'))
 
     print("(Ctrl+c to exit)\n")
     while (True):
