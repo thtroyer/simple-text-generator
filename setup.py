@@ -11,5 +11,10 @@ setup(
     author='thtroyer',
     author_email='tom.troyer@gmail.com',
     description='',
-    install_requires=['textgenrnn', 'tensorflow==2.4.2', 'chevron', 'PyYAML', 'pipfile']
+    install_requires=[
+        'textgenrnn@git+https://github.com/minimaxir/textgenrnn@ee8b9e806d109c25566581f358a4a72b6f03929a',
+        'tensorflow==2.4.2',
+        'chevron',
+        'PyYAML',
+        'pipfile']
 )
