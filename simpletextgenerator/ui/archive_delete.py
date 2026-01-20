@@ -3,98 +3,96 @@ import os
 import shutil
 import tkinter as tk
 from tkinter.messagebox import askyesno
+from typing import List, Optional
+
+from simpletextgenerator.ui.base import BaseWindow
 
 logger = logging.getLogger("ui")
 
 
-def draw_archive_delete_window():
-    draw_archive_delete_window = ArchiveDeleteWindow()
-    draw_archive_delete_window.draw_archive_delete_window()
+def draw_archive_delete_window(parent):
+    ArchiveDeleteWindow(parent)
 
 
-class ArchiveDeleteWindow:
-    def __init__(self):
-        self.selected_project_name = None
-        self.archive_delete_window = None
+class ArchiveDeleteWindow(BaseWindow):
+    def __init__(self, parent):
+        super().__init__(parent, "Archive/Delete job - simple-text-generator")
 
-        self.number_of_iterations = None
-        self.project_name_edit_text = None
-        self.dropout = None
-        self.temperatures_to_generate = None
-        self.items_to_generate_between_generations = None
-        self.training_data_percent = None
-        self.generation_frequency = None
-        self.save_frequency = None
-        self.items_to_generate_at_end = None
-        self.button_open_training_file = None
-        self.training_file = None
-        self.training_file_origin_path = None
-        self.model_to_load = None
-        self.selected_project = ''
+        self.selected_project_name: Optional[tk.StringVar] = None
+        self.project_name_select: Optional[tk.OptionMenu] = None
+        self._init_ui()
 
-    def option_selected(self, selected_value):
-        self.selected_project = selected_value
-        self.project_name_select.config(text=selected_value)
+    def _init_ui(self):
+        main_frame = tk.Frame(self)
+        main_frame.pack(padx=20, pady=20)
 
-    def archive_project(self):
-        if self.selected_project_name.get() == '' or self.selected_project_name.get() == 'Select a project':
-            return
-        shutil.move(f"projects/{self.selected_project_name.get()}",
-                    f"projects/archive/{self.selected_project_name.get()}")
-        self.selected_project_name.set("Select a project")
-        self.destroy_window()
-
-    def delete_project(self):
-        if self.selected_project_name.get() == '' or self.selected_project_name.get() == 'Select a project':
-            return
-        if askyesno(title='Delete confirmation', message='Are you sure you want to delete this project?'):
-            shutil.rmtree(f"projects/{self.selected_project_name.get()}")
-            self.selected_project_name.set("Select a project")
-            self.destroy_window()
-            return
-        self.archive_delete_window.lift()
-
-    def draw_archive_delete_window(self):
-        if self.archive_delete_window is not None:
-            self.archive_delete_window = None
-
-        archive_delete_window = tk.Tk()
-        archive_delete_window.title("Edit existing job - simple-text-generator")
-        main_frame = tk.Frame(archive_delete_window)
-        main_frame.grid()
         top_frame = tk.Frame(main_frame)
-        bottom_frame = tk.Frame(main_frame)
+        top_frame.pack(pady=10)
+
         option_list = self.get_projects_from_disk()
-        self.selected_project_name = tk.StringVar(archive_delete_window)
+        self.selected_project_name = tk.StringVar(self)
         self.selected_project_name.set("Select a project")
+
         self.project_name_select = tk.OptionMenu(
             top_frame,
             self.selected_project_name,
             *option_list
         )
+        self.project_name_select.config(width=40)
+        self.project_name_select.pack()
 
-        self.project_name_select.config(width=50)
-        self.project_name_select.grid(row=0, column=1)
+        bottom_frame = tk.Frame(main_frame)
+        bottom_frame.pack(pady=10)
 
-        tk.Button(bottom_frame, text='Cancel', command=self.destroy_window).grid(row=0, column=0)
-        tk.Button(bottom_frame, text='Archive', command=self.archive_project).grid(row=0, column=1)
-        tk.Button(bottom_frame, text='Delete', command=self.delete_project).grid(row=0, column=2)
-        bottom_frame.grid()
-        self.archive_delete_window = archive_delete_window
+        tk.Button(bottom_frame, text='Cancel', command=self.destroy).grid(row=0, column=0, padx=5)
+        tk.Button(bottom_frame, text='Archive', command=self.archive_project).grid(row=0, column=1, padx=5)
+        tk.Button(bottom_frame, text='Delete', command=self.delete_project).grid(row=0, column=2, padx=5)
 
-        top_frame.grid(row=0, column=0)
-        bottom_frame.grid(row=2, column=0)
-
-    def get_projects_from_disk(self):
+    def get_projects_from_disk(self) -> List[str]:
         project_path = 'projects/'
+        if not os.path.exists(project_path):
+            os.makedirs(project_path)
+
         project_list = []
         for path in os.listdir(project_path):
             if os.path.isdir(os.path.join(project_path, path)):
                 project_list.append(path)
 
-        project_list.remove("archive")
+        if "archive" in project_list:
+            project_list.remove("archive")
+
+        if len(project_list) == 0:
+            project_list.append("No projects.")
+
         return project_list
 
-    def destroy_window(self):
-        if self.archive_delete_window is not None:
-            self.archive_delete_window.destroy()
+    def archive_project(self):
+        project = self.selected_project_name.get()
+        if not project or project == 'Select a project' or project == "No projects.":
+            return
+
+        try:
+            archive_dir = "projects/archive"
+            if not os.path.exists(archive_dir):
+                os.makedirs(archive_dir)
+
+            shutil.move(f"projects/{project}", f"{archive_dir}/{project}")
+            self.selected_project_name.set("Select a project")
+            self.destroy()
+        except Exception as e:
+            logger.error(e)
+            self.show_error(str(e))
+
+    def delete_project(self):
+        project = self.selected_project_name.get()
+        if not project or project == 'Select a project' or project == "No projects.":
+            return
+
+        if askyesno(title='Delete confirmation', message='Are you sure you want to delete this project?', parent=self):
+            try:
+                shutil.rmtree(f"projects/{project}")
+                self.selected_project_name.set("Select a project")
+                self.destroy()
+            except Exception as e:
+                logger.error(e)
+                self.show_error(str(e))

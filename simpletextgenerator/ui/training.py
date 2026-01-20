@@ -4,7 +4,6 @@ import logging
 import os
 import re
 import threading
-import tkinter
 import tkinter as tk
 from datetime import datetime
 from queue import Queue
@@ -12,6 +11,7 @@ from tkinter import ttk, LEFT
 from tkinter.scrolledtext import ScrolledText
 
 from simpletextgenerator.utility.running_mean import RunningMean
+from simpletextgenerator.ui.base import BaseWindow
 
 logger = logging.getLogger("ui")
 
@@ -22,42 +22,41 @@ logger = logging.getLogger("ui")
 # - calculate total ETA
 # - time since last save
 
-def create_training_window():
-    TrainingRunner().begin_work()
+def create_training_window(parent):
+    TrainingRunner(parent).begin_work()
 
 
 class TrainingRunner:
-    def __init__(self):
-        self.tk = tkinter
+    def __init__(self, parent):
+        self.parent = parent
 
     def fire_training(self, loop, training_window, stdout_queue, stderr_queue):
         asyncio.set_event_loop(loop)
 
-        subprocess_protocol = SubprocessProtocol(self.tk, training_window, stdout_queue, stderr_queue)
+        subprocess_protocol = SubprocessProtocol(training_window, stdout_queue, stderr_queue)
         subprocess_protocol.run_training()
 
     def begin_work(self):
         stdout_queue = Queue()
         stderr_queue = Queue()
-        training_window = TrainingWindow(self.tk, stdout_queue, stderr_queue)
-        training_window.draw_training_window()
+        training_window = TrainingWindow(self.parent, stdout_queue, stderr_queue)
+        # training_window is now created and shown (since it's a Toplevel)
 
         loop = asyncio.new_event_loop()
         threading.Thread(target=self.fire_training, daemon=True,
                          args=[loop, training_window, stdout_queue, stderr_queue]).start()
 
 
-class TrainingWindow:
-    def __init__(self, tk, stdout_queue, stderr_queue):
+class TrainingWindow(BaseWindow):
+    def __init__(self, parent, stdout_queue, stderr_queue):
+        super().__init__(parent, "Training model - simple-text-generator")
+
         self.is_autoscroll = True
-        self.set_training_file = None
-        self.save_training_window = None
-        self.back_training_window = None
-        self.training_window = None
-        self.training_text = None
-        self.tk = tk
         self.stdout_queue = stdout_queue
         self.stderr_queue = stderr_queue
+
+        self.training_text = None
+        self.status_text = None
         self.sub_progress_label = None
         self.sub_progress_eta = None
         self.sub_progress = None
@@ -67,44 +66,43 @@ class TrainingWindow:
         self.loss_value_label = None
         self.generation_label = None
         self.generation_value_label = None
-        self.status_text = None
+        self.project_name_label = None
 
         self.total_projects = 0
         self.projects_complete = 0
         self.running_mean_loss = RunningMean(10)
         self.running_mean_generation = RunningMean(100)
 
+        self._init_ui()
+        self.periodic_callback()
+
     def toggle_autoscroll(self):
         self.is_autoscroll = not self.is_autoscroll
 
-    def draw_training_window(self):
-        if self.training_window is not None:
-            self.training_window = None
-
-        training_window = self.tk.Tk()
-        self.training_window = training_window
-        tk = self.tk
-        training_window.title("Training model - simple-text-generator")
-        main_frame = tk.Frame(training_window)
+    def _init_ui(self):
+        main_frame = tk.Frame(self)
         main_frame.grid()
         top_frame = tk.Frame(main_frame)
+        top_frame.pack(fill=tk.X)
 
         self.project_name_label = tk.Label(top_frame, width=20)
-        self.project_name_label.pack(side=LEFT, anchor=tkinter.NW, padx=10, pady=3)
+        self.project_name_label.pack(side=LEFT, anchor=tk.NW, padx=10, pady=3)
         checkbox = tk.Checkbutton(
             top_frame,
             text="Autoscroll text boxes",
             command=self.toggle_autoscroll,
         )
-        checkbox.pack(side=LEFT, anchor=tkinter.NE, padx=500, pady=3)
+        checkbox.pack(side=tk.RIGHT, anchor=tk.NE, padx=10, pady=3)
         checkbox.select()
 
         text_frame = tk.Frame(main_frame)
+        text_frame.pack()
+
         training_text = ScrolledText(
             text_frame,
             wrap=tk.WORD,
             width=100,
-            height=30,
+            height=20, # Reduced height to fit
             font=("Terminal", 7),
             state='normal'
         )
@@ -115,7 +113,7 @@ class TrainingWindow:
             text_frame,
             wrap=tk.WORD,
             width=100,
-            height=30,
+            height=20, # Reduced height to fit
             font=("Terminal", 7),
             state='normal'
         )
@@ -123,7 +121,8 @@ class TrainingWindow:
         self.status_text = status_text
 
         status_frame = tk.Frame(main_frame)
-        status_frame.grid()
+        status_frame.pack()
+
         self.sub_progress_label = tk.Label(status_frame, text="Progress")
         self.sub_progress_label.grid(row=0, column=0)
         self.sub_progress = ttk.Progressbar(status_frame, orient=tk.HORIZONTAL, maximum=100, length=300,
@@ -142,22 +141,12 @@ class TrainingWindow:
         self.generation_value_label = tk.Label(status_frame, text="")
         self.generation_value_label.grid(row=2, column=3)
 
-        # todo
-        # self.project_progress_label = tk.Label(status_frame, text="Project progress")
-        # self.project_progress_label.grid(row=3, column=0)
-        # self.project_progress = ttk.Progressbar(status_frame, orient=tk.HORIZONTAL, maximum=100, length=300, mode='determinate')
-        # self.project_progress.grid(row=3, column=1)
         self.project_progress_label = tk.Label(
             status_frame,
             text="This UI is a work in progress and not representative of final design. \n" +
                  " See the milestones page on GitHub for progress.                      "
         )
-        self.project_progress_label.grid(row=3, column=0)
-
-        top_frame.grid(row=0, column=0)
-        text_frame.grid(row=1, column=0)
-        status_frame.grid(row=2, column=0)
-        self.periodic_callback()
+        self.project_progress_label.grid(row=3, column=0, columnspan=4)
 
     def add_text(self, text):
         text = text.encode("ascii", "ignore").decode()
@@ -172,7 +161,7 @@ class TrainingWindow:
         self.training_text.insert(tk.INSERT, text)
         self.training_text.insert(tk.INSERT, "\n")
         self.training_text.update_idletasks()
-        self.training_window.update_idletasks()
+        self.update_idletasks()
         if self.is_autoscroll:
             self.training_text.see(tk.END)
 
@@ -181,7 +170,7 @@ class TrainingWindow:
         self.status_text.insert(tk.INSERT, f"{time_string}: {text}")
         self.status_text.insert(tk.INSERT, "\n")
         self.status_text.update_idletasks()
-        self.training_window.update_idletasks()
+        self.update_idletasks()
         if self.is_autoscroll:
             self.status_text.see(tk.END)
 
@@ -250,12 +239,6 @@ class TrainingWindow:
         # cleaning up some garbage characters
         text = str.replace(text, '\b', '')
 
-        # most of this data in unnecessary to log
-        # if type == "stderr":
-        #     logger.debug(f"textgennrnn as error: {text}")
-        # else:
-        #     logger.debug(f"textgenrnn: {text}")
-
         if not text.strip():
             return
 
@@ -277,7 +260,11 @@ class TrainingWindow:
 
         if self.is_found_projects_statement(text):
             pieces = text.split(" ")
-            self.total_projects = int(pieces[1])
+            try:
+                self.total_projects = int(pieces[1])
+            except ValueError:
+                self.total_projects = 0
+
             if self.total_projects == 0:
                 self.add_text("Found 0 projects to run.  Nothing to do.")
             self.update_project_label()
@@ -367,7 +354,7 @@ class TrainingWindow:
 
     def periodic_callback(self):
         self.update_ui()
-        self.training_window.after(200, self.periodic_callback)
+        self.after(200, self.periodic_callback)
 
     def get_percentage_bar1(self, text) -> int:
         regex = re.compile(r"[^\.=>]")
@@ -398,17 +385,14 @@ class TrainingWindow:
 
 class SubprocessProtocol(asyncio.SubprocessProtocol):
     training_window = None
-    tk = None
     stdout_queue = None
     stderr_queue = None
 
-    def __init__(self, tk=None, training_window=None, stdout_queue=None, stderr_queue=None):
+    def __init__(self, training_window=None, stdout_queue=None, stderr_queue=None):
         self._exited = False
         self._closed_stdout = False
         self._closed_stderr = False
         self.loop = None
-        if tk is not None:
-            SubprocessProtocol.tk = tk
         if training_window is not None:
             SubprocessProtocol.training_window = training_window
         if stdout_queue is not None:
